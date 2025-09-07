@@ -1,83 +1,146 @@
 projectId: "GEMS - 視覺化敏捷流程管理工具"
-sprintId: 2
-sprintGoal: "完成與 GitHub API 的核心整合，實現產物的版本控制與同步，並重構前端 SVG 渲染邏輯以償還技術債，提升系統的長期穩定性。"
-version: "2.0"
+sprintId: 3
+sprintGoal: "重構靜態流程圖為一個可互動、可摺疊的全景儀表板，並開發 YAML 內容摘要與『創意牆』筆記功能，同時新增跨專案導航，全面提升核心導航與資訊獲取效率。"
+version: "3.0"
 status: "Approved"
 
 stories:
-  - storyId: "3.1"
-    storyTitle: "作為一個開發者，我希望在我上傳產物後，系統能自動將該文件同步到指定的 GitHub Repo，以便讓文件與程式碼的版本保持一致。"
-    technicalBrief: "此故事將首次整合 GitHub API。關鍵在於使用 Google Apps Script 的 `UrlFetchApp` 服務，並透過 `PropertiesService` 安全地管理 API Token 以避免硬編碼。所有 API 呼叫都必須包含符合 NFR3 要求的錯誤處理與超時機制。"
+  - storyId: "5.1"
+    storyTitle: "作為一個 Vibe CEO，我希望將流程圖重構成三個可摺疊的主要階段，以便我可以專注於當前的專案階段，而不會被整個複雜的流程分散注意力。"
+    technicalBrief: "此故事涉及複雜的前端互動邏輯。為應對藍圖中指出的『前端 JavaScript 開發與測試成本增加』的風險 [cite: mvp_blueprint_v3.yaml]，開發將包含額外的原型設計與效能測試時間，以確保摺疊/展開動畫能在 Google Apps Script 環境下滿足 NFR5 的 500ms 視覺響應要求 [cite: mvp_blueprint_v3.yaml]。"
     acceptanceCriteria:
-      - id: "AC-3.1-1"
-        description: "當一份 YAML 檔案被成功儲存到 Google Sheet 後，一個後端函式會被觸發，以啟動 GitHub 同步流程。"
-      - id: "AC-3.1-2"
-        description: "後端 Apps Script 中有一個安全的配置區塊，用於存放 GitHub API Token, Repo 名稱, 分支名稱, 以及目標檔案路徑。"
-      - id: "AC-3.1-3"
-        description: "在 GitHub 的目標 Repo 中，可以查看到一個新的 commit，其內容與上傳的 YAML 文件完全相符。"
+      - id: "AC-5.1-1"
+        description: "流程圖在初始載入時，應顯示為『藍圖規劃』、『衝刺循環』、『迭代學習』三個摺疊起來的階段標題。"
+      - id: "AC-5.1-2"
+        description: "點擊任一階段標題，可以平滑地展開該階段的詳細流程（角色節點），同時其他階段保持摺疊。"
+      - id: "AC-5.1-3"
+        description: "再次點擊已展開的階段標題，可以將其重新摺疊。"
     requiredTests:
       - type: "Functionality Test"
-        description: "驗證 YAML 檔案上傳後，能成功在指定的 GitHub Repo 路徑下看到內容相符的新 commit。"
-      - type: "Security Test"
-        description: "驗證 GitHub API Token 是透過 `PropertiesService` 或類似的安全機制儲存，而非硬編碼在程式碼中。"
-    tasks:
-      - taskId: "3.1-T1"
-        type: "Backend"
-        description: "開發：建立一個安全的配置管理機制 (使用 PropertiesService) 來儲存 GitHub Token 與 Repo 設定。"
-        fulfills: ["AC-3.1-2"]
-      - taskId: "3.1-T2"
-        type: "Backend"
-        description: "開發：實作核心同步邏輯，使用 UrlFetchApp 呼叫 GitHub API 將產物內容 commit 並 push 至指定 Repo。"
-        fulfills: ["AC-3.1-1", "AC-3.1-3"]
+        description: "驗證三個階段的展開與摺疊功能符合 AC-5.1-1 至 AC-5.1-3 的所有要求。"
+      - type: "Performance Test"
+        description: "（對應 NFR5）驗證點擊標題後，展開/摺疊的視覺響應在 500 毫秒內完成，確保互動流暢。"
 
-  - storyId: "3.2"
-    storyTitle: "作為一個系統，在成功將產物推送到 GitHub 後，我需要記錄下版本控制資訊，以便在 GEMS 內部建立產物與程式碼倉儲之間的追溯連結。"
-    technicalBrief: "此故事依賴於 Story 3.1 的 API 呼叫。重點是解析 GitHub API 成功時回傳的 JSON 物件，並將 commit hash 與 blob URL 正確地寫回 Google Sheets 的 `Artifacts` 工作表對應的欄位。"
+    tasks:
+      - taskId: "5.1-T1"
+        type: "Frontend"
+        description: "開發：設計並實作 SVG 圖表的數據結構，使其支持三階段的層次關係。"
+        fulfills: ["AC-5.1-1"]
+      - taskId: "5.1-T2"
+        type: "Frontend"
+        description: "開發：為階段標題添加點擊事件，並實作展開/摺疊的 JavaScript 邏輯與 CSS 過渡動畫。"
+        fulfills: ["AC-5.1-2", "AC-5.1-3"]
+      - taskId: "5.1-T3"
+        type: "QA"
+        description: "測試：執行效能測試，確保動畫的流暢性符合 NFR5 的要求。"
+        fulfills: ["AC-5.1-2"]
+
+  - storyId: "5.2"
+    storyTitle: "作為一個團隊成員，我希望在點擊一個『角色』節點後，能看到他所負責產出的所有『文件』，以便我能快速地找到並查閱相關的專案產物。"
+    technicalBrief: "此功能依賴於 Story 5.1 的摺疊結構。關鍵在於點擊角色節點後，動態生成並顯示文件列表，同時處理文件存在與否的不同狀態。"
     acceptanceCriteria:
-      - id: "AC-3.2-1"
-        description: "後端函式能成功解析 GitHub API 的成功回應，並從中提取出 commit hash 和檔案的 blob URL。"
-      - id: "AC-3.2-2"
-        description: "在 `Artifacts` 工作表中，對應的產物紀錄列，其 `github_commit_hash` 與 `github_file_url` 欄位被成功更新。"
+      - id: "AC-5.2-1"
+        description: "點擊任一『角色』節點，會在其下方或旁邊彈出一個列表，清晰地展示該角色對應的『文件』名稱。"
+      - id: "AC-5.2-2"
+        description: "點擊文件列表中的某個項目，如果該文件已存在，則其內容會被載入到右側的內容顯示區。"
+      - id: "AC-5.2-3"
+        description: "如果文件不存在，點擊後應有明確的提示（例如按鈕變灰或顯示『尚未產出』的工具提示）。"
     requiredTests:
       - type: "Integration Test"
-        description: "驗證 GitHub API 呼叫成功後，Google Sheets 中對應產物的 `github_commit_hash` 與 `github_file_url` 欄位被正確回填。"
-      - type: "Error Handling Test"
-        description: "（對應 NFR3）驗證當 GitHub API 呼叫失敗或超時，系統不會更新 Google Sheets 的欄位，並能記錄下明確的錯誤。"
+        description: "驗證點擊角色節點後，能正確從後端獲取文件列表並在前端顯示。"
+      - type: "UI/UX Test"
+        description: "驗證文件存在與不存在時的 UI 反饋符合 AC-5.2-2 與 AC-5.2-3 的描述。"
     tasks:
-      - taskId: "3.2-T1"
+      - taskId: "5.2-T1"
         type: "Backend"
-        description: "開發：擴充 GitHub API 呼叫邏輯，使其能夠解析成功回應中的 JSON，提取 commit hash 與 file URL。"
-        fulfills: ["AC-3.2-1"]
-      - taskId: "3.2-T2"
-        type: "Backend"
-        description: "開發：實作將提取出的 GitHub 資訊更新回 Google Sheets 中 `Artifacts` 工作表對應紀錄的函式。"
-        fulfills: ["AC-3.2-2"]
+        description: "開發：建立一個後端函式，能根據傳入的『角色』ID，回傳其對應的『文件』列表與狀態。"
+        fulfills: ["AC-5.2-1"]
+      - taskId: "5.2-T2"
+        type: "Frontend"
+        description: "開發：為『角色』SVG 節點添加點擊事件，觸發後端函式並根據回傳結果渲染文件列表。"
+        fulfills: ["AC-5.2-1", "AC-5.2-2", "AC-5.2-3"]
 
-  - storyId: "4.1"
-    storyTitle: "作為一個開發者，我想要將目前寫死在主程式碼中的 SVG 渲染邏輯，重構成一個可複用的元件，以提高程式碼的可維護性並為未來的圖表功能做準備。"
-    technicalBrief: "此為償還技術債的重構任務。核心是將 Sprint 1 中與 SVG 渲染相關的程式碼，從主 HTML/JS 文件中抽離，封裝成一個獨立的 JavaScript 函式。此函式應接收結構化資料（如節點、連結陣列）並回傳完整的 SVG 字串，以實現關注點分離。"
+  - storyId: "6.1"
+    storyTitle: "作為一個 Vibe CEO，當我檢視一份『迭代學習報告』的 YAML 產物時，我希望能直接在頂部看到一個摘要，以便我能快速掌握最重要的結論。"
+    technicalBrief: "為應對 NFR6 (後端解析不阻塞主執行緒) 的要求 [cite: mvp_blueprint_v3.yaml]，後端解析邏輯將被優化。經討論，將新增一項明確的效能測試，以確保大型文件的處理不會影響前端響應。"
     acceptanceCriteria:
-      - id: "AC-4.1-1"
-        description: "程式碼庫中存在一個獨立的函式（例如 `renderProcessDiagram(nodes, links)`），它能接收節點與連結資料作為輸入，並回傳一個完整的 SVG 字串。"
-      - id: "AC-4.1-2"
-        description: "前端主邏輯透過呼叫此函式來渲染流程圖，而不是在自身內部包含大量的 SVG 標籤生成程式碼。"
-      - id: "AC-4.1-3"
-        description: "[無迴歸測試] 重構後，流程圖的視覺外觀、節點位置、以及點擊節點觸發右側面板更新的行為，必須與第一次迭代結束時的狀態完全相同。"
+      - id: "AC-6.1-1"
+        description: "當載入的 YAML 文件類型為 `Iteration_Closing_Report.yaml` 時，後端有一個函式能解析其內容。"
+      - id: "AC-6.1-2"
+        description: "在前端內容顯示區的頂部，會出現一個視覺上突出的摘要框。"
+      - id: "AC-6.1-3"
+        description: "摘要框中至少需包含 `finalStatus` 和 `nextIterationCandidates` 的總數量這兩個關鍵資訊。"
     requiredTests:
-      - type: "Regression Test"
-        description: "（對應 AC-4.1-3）驗證重構後的流程圖，其視覺外觀、節點位置與點擊互動行為，與 Sprint 1 的版本完全一致，無任何功能或視覺上的退化。"
+      - type: "Functionality Test"
+        description: "驗證載入指定的 YAML 報告後，前端能正確顯示包含關鍵欄位的摘要框。"
       - type: "Performance Test"
-        description: "（對應 NFR4）驗證重構後的頁面載入速度與點擊節點時的反應速度，沒有可感知的延遲或效能下降。"
+        description: "（對應 NFR6）驗證當載入一個超過 500 行的 YAML 文件時，UI 必須在 1 秒內對使用者操作做出反應。"
     tasks:
-      - taskId: "4.1-T1"
+      - taskId: "6.1-T1"
+        type: "Backend"
+        description: "開發：實作一個專門解析 `Iteration_Closing_Report.yaml` 的函式，提取所需摘要資訊。"
+        fulfills: ["AC-6.1-1", "AC-6.1-3"]
+      - taskId: "6.1-T2"
         type: "Frontend"
-        description: "開發：將現有的 SVG 渲染程式碼，封裝成一個獨立、可接收參數的 `renderProcessDiagram` 函式。"
-        fulfills: ["AC-4.1-1"]
-      - taskId: "4.1-T2"
+        description: "開發：設計並實作摘要框的 UI 元件，並在載入特定類型文件時觸發後端解析並顯示結果。"
+        fulfills: ["AC-6.1-2"]
+
+  - storyId: "6.2"
+    storyTitle: "作為一個團隊成員，我希望在畫面上隨時有一個『創意牆』的入口，讓我可以隨時記錄下突發奇想或回饋。"
+    technicalBrief: "此功能需要在 Google Sheets 中建立一個新的工作表 `Ideas` 來儲存筆記 [cite: mvp_blueprint_v3.yaml]。後端函式將負責將前端傳來的文字內容寫入此工作表。"
+    acceptanceCriteria:
+      - id: "AC-6.2-1"
+        description: "畫面右下角始終顯示一個浮動的 icon 按鈕。"
+      - id: "AC-6.2-2"
+        description: "點擊該按鈕會彈出一個簡易的文字輸入框與『儲存』按鈕。"
+      - id: "AC-6.2-3"
+        description: "輸入文字並點擊儲存後，內容會被寫入到 Google Sheets 一個名為 `Ideas` 的新工作表中，前端同時給予操作成功的提示。"
+    requiredTests:
+      - type: "End-to-End Test"
+        description: "驗證從點擊浮動按鈕、輸入文字到最終在 Google Sheets 的 `Ideas` 工作表中看到新紀錄的完整流程。"
+    tasks:
+      - taskId: "6.2-T1"
+        type: "Database"
+        description: "準備：在 Google Sheets 中建立一個名為 `Ideas` 的新工作表，並定義欄位 (如: idea_id, content, created_at)。"
+        fulfills: ["AC-6.2-3"]
+      - taskId: "6.2-T2"
         type: "Frontend"
-        description: "重構：修改主 UI 腳本，移除舊的渲染邏輯，改為呼叫新的 `renderProcessDiagram` 函式來生成流程圖。"
-        fulfills: ["AC-4.1-2"]
-      - taskId: "4.1-T3"
-        type: "QA"
-        description: "測試：執行回歸測試，確保重構後的視覺與互動功能與 Sprint 1 完全一致，並符合 AC-4.1-3 的要求。"
-        fulfills: ["AC-4.1-3"]
+        description: "開發：實作浮動按鈕與彈出式輸入框的 UI。"
+        fulfills: ["AC-6.2-1", "AC-6.2-2"]
+      - taskId: "6.2-T3"
+        type: "Backend"
+        description: "開發：建立一個後端函式，接收前端傳來的文字，並將其寫入 `Ideas` 工作表。"
+        fulfills: ["AC-6.2-3"]
+
+  - storyId: "7.1"
+    storyTitle: "作為一個使用者，我希望在 UI 頂部有一個下拉式選單，裡面列出所有專案的名稱，讓我可以直接選擇並切換到不同的專案儀表板。"
+    technicalBrief: "為應對藍圖中『Google Sheets 讀寫效能瓶頸』的風險 [cite: mvp_blueprint_v3.yaml]，此功能將實作一個客戶端快取機制。首次從後端獲取專案列表後，會將其暫存在前端 5 分鐘，以減少後續操作對資料庫的頻繁讀取，提升頁面載入與響應速度。"
+    acceptanceCriteria:
+      - id: "AC-7.1-1"
+        description: "應用程式載入時，會從後端讀取 Google Sheets 中 `Projects` 工作表的所有專案清單。"
+      - id: "AC-7.1-2"
+        description: "UI 頂部的一個固定位置（如 Header 區域）會顯示一個下拉式選單元件，選單中顯示所有專案的名稱 (`project_name`)。"
+      - id: "AC-7.1-3"
+        description: "從下拉式選單中選擇一個不同的專案後，主畫面的儀表板內容（流程圖、產物列表等）會被刷新，以顯示所選專案的資料。"
+    requiredTests:
+      - type: "Functionality Test"
+        description: "驗證下拉選單能正確顯示所有專案，且切換專案後儀表板內容會同步刷新。"
+      - type: "Caching Test"
+        description: "驗證專案列表的客戶端快取機制是否生效（例如：在 5 分鐘內重新載入頁面，應不會觸發後端函式）。"
+    tasks:
+      - taskId: "7.1-T1"
+        type: "Backend"
+        description: "開發：建立一個後端函式，用於讀取並回傳 `Projects` 工作表中的所有專案清單。"
+        fulfills: ["AC-7.1-1"]
+      - taskId: "7.1-T2"
+        type: "Frontend"
+        description: "開發：實作下拉式選單 UI 元件，並在頁面載入時呼叫後端函式以填充選項。"
+        fulfills: ["AC-7.1-2"]
+      - taskId: "7.1-T3"
+        type: "Frontend"
+        description: "開發：實作客戶端快取邏輯，將獲取到的專案列表暫存於瀏覽器變數中。"
+        fulfills: []
+      - taskId: "7.1-T4"
+        type: "Frontend"
+        description: "開發：為下拉選單添加事件監聽，當選擇不同專案時，觸發頁面或資料的重新載入。"
+        fulfills: ["AC-7.1-3"]
