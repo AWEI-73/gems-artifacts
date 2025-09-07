@@ -1,26 +1,26 @@
 # ===================================================================
-# GEMS - MVP Blueprint v4.0
+# GEMS - MVP Blueprint v3
 # ===================================================================
-# Iteration: 2
-# Focus: 核心技術整合與前端架構重構 (Core Tech Integration & Frontend Refactoring)
+# Iteration: 3
+# Focus: 核心導航、互動式儀表板升級與使用者體驗優化
 # ===================================================================
 
 projectInfo:
   projectName: "GEMS - 視覺化敏捷流程管理工具"
   executiveSummary: "一個基於 Google Apps Script 和 Google Sheets 的輕量級網頁應用，旨在將定義好的敏捷開發流程視覺化。它透過互動式流程圖來管理各階段產出的 YAML 文件，提供團隊一個清晰、集中且可追溯的專案儀表板。"
-  sprintGoal: "完成與 GitHub API 的核心整合，實現產物的版本控制與同步，並重構前端 SVG 渲染邏輯以償還技術債，提升系統的長期穩定性。"
+  sprintGoal: "新增跨專案導航的下拉式選單。同時，將目前的靜態流程圖重構為一個可互動、可摺疊的全景儀表板，並開發 YAML 內容摘要與『創意牆』筆記功能，全面提升核心導航與資訊獲取效率。"
 
 technicalConsiderations:
   platforms: "網頁應用，主要透過桌面瀏覽器訪問。"
   technologyPreferences: "後端使用 Google Apps Script，資料庫使用 Google Sheets，前端使用 HTML Service 搭配 JavaScript/CSS。"
-  integrationNeeds: "需要與 GitHub REST API 進行穩定的後端整合。"
+  integrationNeeds: "無新增外部 API 整合需求。"
 
 constraintsAndRisks:
   constraints: "需在 Google Apps Script 的執行時間與效能限制下運作。"
   risks:
-    - "風險一: 隨著專案與產物數量增長，Google Sheets 作為資料庫可能遇到讀寫效能瓶頸。"
+    - "風險一: 隨著專案與產物數量增長，Google Sheets 作為資料庫可能遇到讀寫效능瓶頸。"
     - "風險二: 外部 API (GitHub) 的穩定性與網路延遲，可能影響產物同步的成功率與使用者體驗。"
-    - "風險三: GitHub API 的認證權杖需要被安全地儲存與管理。"
+    - "風險三: 全景儀表板的互動邏輯較為複雜，可能增加前端 JavaScript 的開發與測試成本，並對 GAS 的渲染效能帶來挑戰。"
 
 architecture:
   highLevelArchitecture:
@@ -31,97 +31,114 @@ architecture:
           B -- Client-side JS --> C{Google Apps Script (Server-side)};
           C -- SpreadsheetApp --> D[Google Sheets (Database)];
           C -- UrlFetchApp --> E[GitHub API];
+          C -- PropertiesService --> F[Script Properties];
     frontendBackendIntegration: "前端透過 `google.script.run` 呼叫後端的 Apps Script 函式，進行資料的讀寫與外部服務的觸發。"
   techStack:
     - category: "Backend Runtime"
       technology: "Google Apps Script"
-      reason: "無伺服器、與 G Suite 無縫整合、低成本快速啟動。"
     - category: "Database"
       technology: "Google Sheets"
-      reason: "適合作為 MVP 階段的輕量級資料庫，直觀易於管理。"
     - category: "Frontend"
       technology: "HTML Service (HTML/CSS/JS)"
-      reason: "Google Apps Script 內建的網頁託管服務。"
     - category: "Diagram Rendering"
-      technology: "Inline SVG"
-      reason: "[As-Built from Sprint 1] 已驗證在 GAS 環境中比第三方函式庫更穩健。"
+      technology: "Inline SVG (Componentized)"
     - category: "External Services"
       technology: "GitHub API"
-      reason: "用於實現產物的版本控制與程式碼同步。"
   dataModels:
     - modelName: "Projects"
       description: "儲存專案的清單與基本資訊。"
       fields:
         project_id: "string (Primary Key)"
         project_name: "string"
-        status: "string"
-        created_at: "Timestamp"
     - modelName: "Artifacts"
       description: "儲存所有上傳的產物（YAML 文件）及其元數據。"
+    - modelName: "Ideas"
+      description: "儲存來自『創意牆』的文字筆記。"
       fields:
-        artifact_id: "string (Primary Key)"
-        project_id: "string (Foreign Key)"
-        node_id: "string"
-        artifact_type: "string"
-        related_artifact_id: "string"
-        status: "string"
-        version: "string"
-        key_info_1: "string"
-        key_info_2: "string"
-        raw_content: "string (Full YAML text)"
-        github_file_url: "string"
-        github_commit_hash: "string"
+        idea_id: "string (Primary Key)"
+        content: "string"
         created_at: "Timestamp"
 
 requirements:
   inScope:
-    - id: "FR6"
-      description: "系統後端能夠使用預設的配置（API Token, Repo, Branch），透過 UrlFetchApp 服務向 GitHub API 發送請求。"
-    - id: "FR7"
-      description: "當使用者上傳一份 YAML 產物後，其內容會被成功地 commit 並 push到指定的 GitHub Repo 的指定路徑下。"
-    - id: "FR8"
-      description: "在成功 push 到 GitHub 後，對應的回應（包含 commit hash 和檔案 URL）會被解析並儲存回 Google Sheets 中 `Artifacts` 工作表的相應欄位。"
-    - id: "FR9"
-      description: "前端的 SVG 流程圖渲染邏輯，被從主 UI 腳本中分離出來，封裝成一個獨立、可複用的函式或元件。"
+    - id: "FR10"
+      description: "系統需將靜態流程圖重構為三個可獨立展開/摺疊的主要階段：『藍圖規劃』、『衝刺循環』、『迭代學習』。"
+    - id: "FR11"
+      description: "在每個階段內，主要的圖表節點應代表『角色 (Role)』。"
+    - id: "FR12"
+      description: "使用者點擊任一『角色』節點後，系統需能顯示或連結至該角色負責產出的『文件 (Document)』列表。"
+    - id: "FR13"
+      description: "系統後端需能解析上傳的 YAML 內容，並在前端針對特定文件類型顯示一個包含關鍵欄位的摘要區塊。"
+    - id: "FR14"
+      description: "畫面中需提供一個浮動按鈕，使用者點擊後可快速輸入文字筆記，並將其儲存至 Google Sheets 的新工作表中。"
+    - id: "FR15"
+      description: "UI 頂部需提供一個下拉式選單，用於顯示並切換不同的專案。"
   outOfScope:
-    - "YAML 內容的智慧摘要與解析功能。"
-    - "浮動『創意牆』功能。"
-    - "節點根據狀態『亮燈』的動態視覺效果。"
-    - "多 GitHub Repo 或多分支的動態配置功能。"
+    - "優化 GitHub API 的錯誤處理與前端回饋機制。"
+    - "將 SVG 佈局優化（如節點尺寸、間距）進行標準化參數配置。"
+    - "創意牆筆記的進階管理功能（如編輯、刪除、標籤分類）。"
   nonFunctional:
-    - id: "NFR3"
-      description: "對 GitHub API 的呼叫操作應有 10 秒的超時限制，並有基本的錯誤處理機制。"
-    - id: "NFR4"
-      description: "SVG 元件化重構後，前端頁面的載入時間與互動效能不應有可感知的下降。"
+    - id: "NFR5"
+      description: "全景儀表板的互動操作（展開/摺疊）應在 500 毫秒內完成視覺響應，確保流暢的使用者體驗。"
+    - id: "NFR6"
+      description: "後端的 YAML 解析不應阻塞主執行緒，確保在處理大型文件時 UI 依然保持響應。"
 
 epicsAndStories:
-  - epic: "Epic 3: 核心技術整合與版本控制"
+  - epic: "Epic 5: 互動式全景儀表板升級"
     stories:
-      - id: "3.1"
-        story: "作為一個開發者，我希望在我上傳產物後，系統能自動將該文件同步到指定的 GitHub Repo，以便讓文件與程式碼的版本保持一致。"
+      - id: "5.1"
+        story: "作為一個 Vibe CEO，我希望將流程圖重構成三個可摺疊的主要階段，以便我可以專注於當前的專案階段，而不會被整個複雜的流程分散注意力。"
+        sourceLog: "Iteration 2 Closing Report (NIC-S2-005)"
         acceptanceCriteria:
-          - id: "AC-3.1-1"
-            description: "當一份 YAML 檔案被成功儲存到 Google Sheet 後，一個後端函式會被觸發，以啟動 GitHub 同步流程。"
-          - id: "AC-3.1-2"
-            description: "後端 Apps Script 中有一個安全的配置區塊，用於存放 GitHub API Token, Repo 名稱, 分支名稱, 以及目標檔案路徑。"
-          - id: "AC-3.1-3"
-            description: "在 GitHub 的目標 Repo 中，可以查看到一個新的 commit，其內容與上傳的 YAML 文件完全相符。"
-      - id: "3.2"
-        story: "作為一個系統，在成功將產物推送到 GitHub 後，我需要記錄下版本控制資訊，以便在 GEMS 內部建立產物與程式碼倉儲之間的追溯連結。"
+          - id: "AC-5.1-1"
+            description: "流程圖在初始載入時，應顯示為『藍圖規劃』、『衝刺循環』、『迭代學習』三個摺疊起來的階段標題。"
+          - id: "AC-5.1-2"
+            description: "點擊任一階段標題，可以平滑地展開該階段的詳細流程（角色節點），同時其他階段保持摺疊。"
+          - id: "AC-5.1-3"
+            description: "再次點擊已展開的階段標題，可以將其重新摺疊。"
+      - id: "5.2"
+        story: "作為一個團隊成員，我希望在點擊一個『角色』節點後，能看到他所負責產出的所有『文件』，以便我能快速地找到並查閱相關的專案產物。"
+        sourceLog: "Iteration 2 Closing Report (NIC-S2-005)"
         acceptanceCriteria:
-          - id: "AC-3.2-1"
-            description: "後端函式能成功解析 GitHub API 的成功回應，並從中提取出 commit hash 和檔案的 blob URL。"
-          - id: "AC-3.2-2"
-            description: "在 `Artifacts` 工作表中，對應的產物紀錄列，其 `github_commit_hash` 與 `github_file_url` 欄位被成功更新。"
-  - epic: "Epic 4: 前端架構健壯性提升"
+          - id: "AC-5.2-1"
+            description: "點擊任一『角色』節點，會在其下方或旁邊彈出一個列表，清晰地展示該角色對應的『文件』名稱。"
+          - id: "AC-5.2-2"
+            description: "點擊文件列表中的某個項目，如果該文件已存在，則其內容會被載入到右側的內容顯示區。"
+          - id: "AC-5.2-3"
+            description: "如果文件不存在，點擊後應有明確的提示（例如按鈕變灰或顯示『尚未產出』的工具提示）。"
+
+  - epic: "Epic 6: 使用者體驗與資訊可及性優化"
     stories:
-      - id: "4.1"
-        story: "作為一個開發者，我想要將目前寫死在主程式碼中的 SVG 渲染邏輯，重構成一個可複用的元件，以提高程式碼的可維護性並為未來的圖表功能做準備。"
-        sourceLog: "Iteration 1 Closing Report (NIC-S1-002)"
+      - id: "6.1"
+        story: "作為一個 Vibe CEO，當我檢視一份『迭代學習報告』的 YAML 產物時，我希望能直接在頂部看到一個摘要，包含最終狀態和下次迭代候選項目數量，以便我能快速掌握最重要的結論。"
+        sourceLog: "Iteration 2 Closing Report (NIC-S2-001)"
         acceptanceCriteria:
-          - id: "AC-4.1-1"
-            description: "程式碼庫中存在一個獨立的函式（例如 `renderProcessDiagram(nodes, links)`），它能接收節點與連結資料作為輸入，並回傳一個完整的 SVG 字串。"
-          - id: "AC-4.1-2"
-            description: "前端主邏輯透過呼叫此函式來渲染流程圖，而不是在自身內部包含大量的 SVG 標籤生成程式碼。"
-          - id: "AC-4.1-3"
-            description: "[無迴歸測試] 重構後，流程圖的視覺外觀、節點位置、以及點擊節點觸發右側面板更新的行為，必須與第一次迭代結束時的狀態完全相同。"
+          - id: "AC-6.1-1"
+            description: "當載入的 YAML 文件類型為 `Iteration_Closing_Report.yaml` 時，後端有一個函式能解析其內容。"
+          - id: "AC-6.1-2"
+            description: "在前端內容顯示區的頂部，會出現一個視覺上突出的摘要框。"
+          - id: "AC-6.1-3"
+            description: "摘要框中至少需包含 `finalStatus` 和 `nextIterationCandidates` 的總數量這兩個關鍵資訊。"
+      - id: "6.2"
+        story: "作為一個團隊成員，我希望在畫面上隨時有一個『創意牆』的入口，讓我可以隨時記錄下突發奇想或回饋，而不需要切換頁面或打斷當前思路。"
+        sourceLog: "Iteration 2 Closing Report (NIC-S2-002)"
+        acceptanceCriteria:
+          - id: "AC-6.2-1"
+            description: "畫面右下角始終顯示一個浮動的 icon 按鈕。"
+          - id: "AC-6.2-2"
+            description: "點擊該按鈕會彈出一個簡易的文字輸入框與『儲存』按鈕。"
+          - id: "AC-6.2-3"
+            description: "輸入文字並點擊儲存後，內容會被寫入到 Google Sheets 一個名為 `Ideas` 的新工作表中，前端同時給予操作成功的提示。"
+
+  - epic: "Epic 7: 核心 UI 導航增強"
+    stories:
+      - id: "7.1"
+        story: "作為一個使用者，我希望在 UI 頂部有一個下拉式選單，裡面列出所有專案的名稱，讓我可以直接選擇並切換到不同的專案儀表板。"
+        sourceLog: "Vibe CEO's new directive during Iteration 3 planning"
+        acceptanceCriteria:
+          - id: "AC-7.1-1"
+            description: "應用程式載入時，會從後端讀取 Google Sheets 中 `Projects` 工作表的所有專案清單。"
+          - id: "AC-7.1-2"
+            description: "UI 頂部的一個固定位置（如 Header 區域）會顯示一個下拉式選單元件，選單中顯示所有專案的名稱 (`project_name`)。"
+          - id: "AC-7.1-3"
+            description: "從下拉式選單中選擇一個不同的專案後，主畫面的儀表板內容（流程圖、產物列表等）會被刷新，以顯示所選專案的資料。"
