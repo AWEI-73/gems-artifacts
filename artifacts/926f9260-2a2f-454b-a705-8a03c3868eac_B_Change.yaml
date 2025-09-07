@@ -1,22 +1,34 @@
-proposalId: "SCP-GEMS-005"
-sprintId: 2
-status: "PendingApproval"
-changeType: "TACTICAL_FIX"
+proposalId: "SCP-GEMS-006"
+sprintId: 4
+status: "Proposed"
+changeType: "IMPLICIT_ITERATION"
+
 trigger:
-  type: "技術問題"
-  reportedBy: "開發團隊"
-  date: "2025-09-06"
-  description: "在任務 7.1-T3 的實作過程中，發現因 Google API 未完全初始化而導致的競態條件問題，觸發了 'google is not defined' 錯誤。"
+  sourceFile: "sprint_fillback.yaml"
+  storyId: "8.2"
+  taskId: "8.2-T2, 8.2-T3, 8.2-T4"
+  description: "在開發自動化測試案例的過程中，發現了強化 Mock 框架的機會，並進行了計劃外的協作除錯與迭代。"
+
 impactAnalysis:
-  sprintGoalImpact: "無。此修復確保了透過下拉選單實現順暢專案切換的衝刺目標得以穩定實現。"
-  summary: "透過引入 `initializeApp` 函式解決了競態條件問題，確保 Google API 在執行相關邏輯前已完全載入，從而提升應用程式的穩定性。"
+  summary: "此次迭代未影響衝刺目標或交付時程，反而產生了正面效益。"
+  impacts:
+    - area: "技術資產"
+      description: "成功建立了一個比原計畫更穩定、更可擴展的自動化測試基礎框架，顯著提升了專案的長期技術資產價值。"
+    - area: "團隊協作"
+      description: "開發團隊與 CEO 之間的高效協作除錯，強化了團隊解決複雜問題的能力。"
+    - area: "時程"
+      description: "無負面影響。所有相關的驗收標準 (AC-8.2-1, AC-8.2-2) 均已達成。"
+
 changeScope:
-  - storyId: "7.1"
-    action: "無變更"
+  - storyId: "8.2"
+    action: "NO_CHANGE"
     tasks:
-      - taskId: "7.1-T3"
-        action: "修改"
+      - taskId: "8.2-T2, 8.2-T3, 8.2-T4"
+        action: "MODIFY"
         updates:
-          description: "實作專案列表載入的雙層快取機制，並透過引入 `initializeApp` 函式修復競態條件問題，確保 Google API 在執行前已準備就緒。"
+          description: "將原任務描述『開發測試案例』，更新為『開發測試案例，並協作強化 Mock 框架的穩定性與擴展性』，以準確反映實際執行內容。"
+
 proposedSolution:
-  rationale: "競態條件問題導致專案列表載入和儀表板切換不可靠。引入 `initializeApp` 函式確保 Google API 完全初始化，從而解決錯誤並維護專案選擇功能的完整性。"
+  summary: "正式批准並認可此次在 Story 8.2 執行過程中發生的『隱性迭代』。"
+  actions:
+    - "在最終的衝刺總結報告 (Sprint Summary Report) 中，將此 `IMPLICIT_ITERATION` 記錄為一次成功的技術投資與團隊協作成果。"
