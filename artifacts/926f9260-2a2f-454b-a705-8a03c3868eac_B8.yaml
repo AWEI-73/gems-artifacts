@@ -1,0 +1,152 @@
+# ===================================================================
+# Iteration Closing Report (ICR) / As-Built Blueprint
+# ===================================================================
+# This document is the evolution of the MVP Blueprint after an iteration.
+# It reflects the "as-built" state of the system, not just the plan.
+# It serves as the single source of truth for the next iteration planning.
+# ===================================================================
+
+iterationId: 1
+sprintId: 1
+sourceBlueprintVersion: "v3"
+finalStatus: "COMPLETED_WITH_DEVIATIONS"
+
+# --- 專案元資訊 (Project Metadata) ---
+projectInfo:
+  projectName: "GEMS - 視覺化敏捷流程管理工具"
+  executiveSummary: "一個基於 Google Apps Script 和 Google Sheets 的輕量級網頁應用，旨在將定義好的敏捷開發流程視覺化。"
+  sprintGoal: "完成 MVP 的核心功能，建立一個可運作的前後端應用，讓使用者能建立專案、上傳產物並查看內容。"
+
+# --- 1. 執行日誌與成果 (Execution Log & Outcomes) ---
+executionLog:
+  - story: "1.1"
+    storyTitle: "作為一個專案經理，我想要建立一個新專案並為它命名..."
+    finalStatus: "Done"
+    implementationDetails:
+      - taskId: "1.1-T1"
+        logType: "PROGRESS"
+        description: "開發：根據 mvp_blueprint_v3.yaml 規範，使用 HTML Service 和 Google Apps Script 撰寫前後端腳本。"
+    acceptanceCriteriaOutcome:
+      - id: "AC-1.1-1"
+        qaResult: "PASS"
+        qaFinding: "QA 報告確認，fillback 中的 CEO 驗證筆記『前端介面成功渲染『新增專案』按鈕』，與 Plan 中 AC 描述完全相符。"
+      - id: "AC-1.1-2"
+        qaResult: "PASS"
+        qaFinding: "QA 報告確認，fillback 中的 CEO 驗證筆記『提供 Google Sheet 的成功紀錄為證』，證明後端寫入功能符合預期。"
+
+  - story: "1.2"
+    storyTitle: "作為一個團隊成員，我想要在打開應用時，能看到一個基於 Mermaid.txt 的標準開發流程圖..."
+    finalStatus: "Done"
+    implementationDetails:
+      - taskId: "1.2-T1"
+        logType: "TACTICAL_FIX"
+        description: "修正：Mermaid.js 函式庫在 Google Apps Script 環境中渲染失敗或無法綁定點擊事件。"
+    acceptanceCriteriaOutcome:
+      - id: "AC-1.2-1"
+        qaResult: "PASS"
+        qaFinding: "QA 報告確認，即使技術方案變更，最終成果依然滿足『成功渲染出流程圖』的 AC 要求。"
+      - id: "AC-1.2-2"
+        qaResult: "PASS"
+        qaFinding: "QA 報告確認，Fillback 中的 CEO 驗證筆記『點擊圖中任一節點後，右側內容面板會顯示對應的節點資訊』，充分滿足了『可點擊』的 AC 要求。"
+    deviationAnalysis:
+      reason: "技術方案調整 (Technical adjustment)"
+      changeProposalId: "SCP-GEMS-001"
+      details: "原定的 Mermaid.js 方案因技術限制被替換為原生 SVG 方案，此變更已獲批准並成功實施。"
+
+  - story: "2.1"
+    storyTitle: "作為一個開發者，我想要點擊流程圖中的一個文件節點...以便上傳我完成的 YAML 工作日誌。"
+    finalStatus: "Done"
+    implementationDetails:
+      - taskId: "2.1-T1"
+        logType: "PROGRESS"
+        description: "開發：完成點擊節點上傳 YAML 文件的流程。"
+    acceptanceCriteriaOutcome:
+      - id: "AC-2.1-1"
+        qaResult: "PASS"
+        qaFinding: "QA 報告確認，Fillback 中的 CEO 手動測試結果，與 AC 描述完全一致。"
+      - id: "AC-2.1-2"
+        qaResult: "PASS"
+        qaFinding: "QA 報告確認，Fillback 中的驗證筆記『介面顯示成功訊息...』，證明了前後端通訊成功。"
+
+  - story: "2.2"
+    storyTitle: "作為一個系統，當收到上傳的 YAML 文件後，我需要將其內容及關聯資訊儲存到 Google Sheet..."
+    finalStatus: "Done"
+    implementationDetails:
+      - taskId: "2.2-T1"
+        logType: "PROGRESS"
+        description: "開發：完成後端儲存 YAML 產物至 Google Sheets 的邏輯。"
+    acceptanceCriteriaOutcome:
+      - id: "AC-2.2-1"
+        qaResult: "PASS"
+        qaFinding: "QA 報告確認，Fillback 中的 CEO 驗證筆記證明後端成功接收檔案。"
+      - id: "AC-2.2-2"
+        qaResult: "PASS"
+        qaFinding: "QA 報告審核確認：Fillback 的 developerNotes 提供了關鍵細節，證明 `raw_content`、`project_id` 和 `node_id` 欄位均被正確填寫，完全滿足 AC。"
+
+  - story: "2.3"
+    storyTitle: "作為一個品管師，我想要點擊一個已經上傳過 QA 報告的節點...以便在畫面右側看到報告的完整內容以進行審核。"
+    finalStatus: "Done"
+    implementationDetails:
+      - taskId: "2.3-T1"
+        logType: "PROGRESS"
+        description: "開發：完成點擊節點後，讀取並顯示已上傳的 YAML 內容。"
+      - taskId: "opt-2.3-T2"
+        logType: "IMPLICIT_ITERATION"
+        description: "優化：為主要內容區增加滾動條，解決內容超出畫面問題。"
+    acceptanceCriteriaOutcome:
+      - id: "AC-2.3-1"
+        qaResult: "PASS"
+        qaFinding: "QA 報告確認，Fillback 中的 CEO 手動測試結果，證明系統能正確檢查紀錄。"
+      - id: "AC-2.3-2"
+        qaResult: "PASS"
+        qaFinding: "QA 報告確認，Fillback 的驗證筆記明確提到 `raw_content` 已成功顯示。"
+    deviationAnalysis:
+      reason: "品質提升 (Quality improvement)"
+      changeProposalId: "SCP-GEMS-002"
+      details: "根據使用者體驗回饋，新增了滾動條功能以優化長內容的顯示，此變更已獲批准並成功實施。"
+
+# --- 2. 竣工版架構與技術棧 (As-Built Architecture & Tech Stack) ---
+asBuiltArchitecture:
+  highLevelArchitecture:
+    systemDiagram: |
+      graph TD;
+          A[使用者瀏覽器] --> B[HTML Service (UI)];
+          B -- Client-side JS --> C{Google Apps Script (Server-side)};
+          C -- SpreadsheetApp --> D[Google Sheets (Database)];
+  techStack:
+    - category: "Backend Runtime"
+      technology: "Google Apps Script"
+    - category: "Database"
+      technology: "Google Sheets"
+    - category: "Frontend"
+      technology: "HTML Service (HTML/CSS/JS)"
+    - category: "Diagram Rendering"
+      technology: "Inline SVG"
+      reason: "[已變更] 原定的 Mermaid.js 方案因在 Google Apps Script 環境中存在穩定性問題，已由 Story 1.2 的戰術修正 (TACTICAL_FIX) 替換為更穩健的原生 SVG 渲染方案。"
+  architecturalNotes:
+    - noteId: "AN-UI-001"
+      type: "IMPROVEMENT_IMPLEMENTED"
+      description: "由 Story 2.3 的隱性迭代 (IMPLICIT_ITERATION) 引入，為內容顯示區增加了 CSS 滾動條，以改善長文本的用戶體驗。"
+      relatedChangeProposal: "SCP-GEMS-002"
+
+# --- 3. 下次迭代候選項目 (Next Iteration Candidates) ---
+nextIterationCandidates:
+  - candidateId: "NIC-S1-001"
+    type: "NEW_FEATURE_DEVELOPMENT"
+    title: "實現節點『亮燈』功能以動態顯示狀態"
+    description: "目前節點是靜態的。此功能將根據 `Artifacts` 工作表中的紀錄，動態改變流程圖中節點的顏色（例如，已上傳產物的節點顯示為綠色），為使用者提供即時的進度回饋。"
+    priority: "HIGH"
+    sourceLog: "Original MVP Backlog (outOfScope item)"
+  - candidateId: "NIC-S1-002"
+    type: "TECHNICAL_DEBT_REPAYMENT"
+    title: "將原生 SVG 渲染邏輯封裝為可複用元件"
+    description: "Story 1.2 的戰術修正成功解決了渲染問題，但目前的 SVG 產生邏輯可能與主程式碼耦合。應將其重構為一個獨立、可配置的函式或元件，提高程式碼的可維護性與複用性。"
+    priority: "MEDIUM"
+    sourceLog: "Story 1.2 Deviation Analysis (SCP-GEMS-001)"
+  - candidateId: "NIC-S1-003"
+    type: "QUALITY_IMPROVEMENT"
+    title: "全面審核 UI 元素以優化使用者體驗"
+    description: "Story 2.3 中為內容區增加滾動條的優化廣受好評。應安排一次全面的 UI/UX 審核，找出其他可能影響使用的細節（如按鈕大小、載入提示等），並將其作為一個集中的改進任務。"
+    priority: "MEDIUM"
+    sourceLog: "Story 2.3 Deviation Analysis (SCP-GEMS-002)"
+
