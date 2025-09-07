@@ -1,34 +1,38 @@
-proposalId: "SCP-GEMS-006"
-sprintId: 4
+proposalId: "SCP-GEMS-007"
+sprintId: 5
 status: "Proposed"
-changeType: "IMPLICIT_ITERATION"
+changeType: "TACTICAL_FIX"
 
 trigger:
   sourceFile: "sprint_fillback.yaml"
-  storyId: "8.2"
-  taskId: "8.2-T2, 8.2-T3, 8.2-T4"
-  description: "在開發自動化測試案例的過程中，發現了強化 Mock 框架的機會，並進行了計劃外的協作除錯與迭代。"
+  storyId: "10.3"
+  taskId: "10.3-T1, 10.3-T3"
+  description: "在 Story 10.3 的開發與測試過程中，為了解決後端上傳邏輯缺陷與前端 UI 迴歸性問題，執行了兩次關鍵的戰術性修正。"
 
 impactAnalysis:
-  summary: "此次迭代未影響衝刺目標或交付時程，反而產生了正面效益。"
+  summary: "這兩次修正是成功交付 Story 10.3 的必要措施。它們解決了阻礙功能驗收的技術障礙，對衝刺目標的達成產生了直接的正面貢獻，且未對時程造成負面影響。"
   impacts:
-    - area: "技術資產"
-      description: "成功建立了一個比原計畫更穩定、更可擴展的自動化測試基礎框架，顯著提升了專案的長期技術資產價值。"
-    - area: "團隊協作"
-      description: "開發團隊與 CEO 之間的高效協作除錯，強化了團隊解決複雜問題的能力。"
+    - area: "功能穩定性"
+      description: "後端修復確保了核心的上傳功能具備健壯性；前端修復則解決了嚴重的 UI 迴歸問題，保障了使用者體驗。"
+    - area: "驗收標準"
+      description: "若無此修正，驗收標準 AC-10.3-2 與 AC-10.3-3 將無法通過。修正後，所有相關 AC 均已滿足。"
     - area: "時程"
-      description: "無負面影響。所有相關的驗收標準 (AC-8.2-1, AC-8.2-2) 均已達成。"
+      description: "無負面影響。修復是在原定的任務執行時間內完成的。"
 
 changeScope:
-  - storyId: "8.2"
+  - storyId: "10.3"
     action: "NO_CHANGE"
     tasks:
-      - taskId: "8.2-T2, 8.2-T3, 8.2-T4"
+      - taskId: "10.3-T1"
         action: "MODIFY"
         updates:
-          description: "將原任務描述『開發測試案例』，更新為『開發測試案例，並協作強化 Mock 框架的穩定性與擴展性』，以準確反映實際執行內容。"
+          description: "將原任務『實作後端 createOrUpdateArtifact 函式』，更新為『修復：與 Vibe CEO 協作重構 createOrUpdateArtifact 與 syncToGitHub 函式，穩定後端上傳邏輯』，以準確反映實際執行內容。"
+      - taskId: "10.3-T3"
+        action: "MODIFY"
+        updates:
+          description: "將原任務『重構產物儲存功能』，更新為『修復：重構前端 renderProcessDiagram 與 handleFileSelect 函式，解決 UI 狀態顯示與重複上傳的迴歸問題』，以準確反映實際執行內容。"
 
 proposedSolution:
-  summary: "正式批准並認可此次在 Story 8.2 執行過程中發生的『隱性迭代』。"
+  summary: "正式批准並認可此次在 Story 10.3 執行過程中所做的兩次戰術性修正。"
   actions:
-    - "在最終的衝刺總結報告 (Sprint Summary Report) 中，將此 `IMPLICIT_ITERATION` 記錄為一次成功的技術投資與團隊協作成果。"
+    - "在最終的衝刺總結報告 (Sprint Summary Report) 中，將這兩筆 `TACTICAL_FIX` 的日誌納入，以忠實記錄為達成目標所做的關鍵技術決策與執行細節。"
