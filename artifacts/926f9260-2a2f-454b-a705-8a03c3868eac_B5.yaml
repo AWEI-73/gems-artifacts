@@ -1,65 +1,100 @@
-storyId: "8.1"
-storyTitle: "作為一名開發者，我希望能建立一個全局的初始化框架，並將現有的 initializeApp 函式標準化，以便能從根本上解決 Google API 的競態條件問題，確保應用的穩定性。"
+storyId: "9.1"
+storyTitle: "作為一名使用者，我希望能一次性載入所有專案與產物的元數據到前端，以便在應用程式內進行任何導航或篩選操作時，都能獲得即時的 UI 反應，無需等待後端載入。"
 acceptanceCriteriaStatus:
-  - id: "AC-8.1-1"
+  - id: "AC-9.1-1"
     status: "Fulfilled"
-    verificationNote: "Vibe CEO 已確認，前端程式碼中已建立 G_API 模組來管理 API 狀態。"
-  - id: "AC-8.1-2"
+    verificationNote: "Vibe CEO 已透過瀏覽器開發者工具確認，應用啟動時僅呼叫一次 `initializeAppWithData` API。"
+  - id: "AC-9.1-2"
     status: "Fulfilled"
-    verificationNote: "Vibe CEO 已確認，所有 google.script.run 呼叫都已重構為透過 G_API.run 執行。"
-  - id: "AC-8.1-3"
+    verificationNote: "Vibe CEO 已確認，切換專案時無任何後端 API 呼叫，UI 反應即時。"
+  - id: "AC-9.1-3"
     status: "Fulfilled"
-    verificationNote: "Vibe CEO 已在開發者工具中模擬慢速網路 (Slow 3G) 進行壓力測試，確認應用程式在長時間延遲後依然能成功載入並正常運作，未再出現競態條件錯誤。"
+    verificationNote: "Vibe CEO 已確認，展開角色節點時，文件列表的渲染來自前端快取，無延遲。"
 testingLog:
   - level: "使用者驗收測試 (UAT)"
-    method: "由 Vibe CEO 進行端對端手動操作驗證，特別是在模擬慢速網路下。"
-    result: "通過，CEO 回報基本功能正常，且在慢速網路下應用能最終成功載入，未發生崩潰。"
+    method: "由 Vibe CEO 進行端對端手動操作驗證，並檢查網路流量。"
+    result: "通過，所有快取與 UI 互動功能符合預期。"
 developerLog:
   - logType: "PROGRESS"
-    taskId: "8.1-T1"
-    description: "開發：在 Index.html 中設計並實作了名為 G_API 的全局非同步初始化模組。"
+    taskId: "9.1-T1, 9.1-T2, 9.1-T3"
+    description: "開發與重構：實作後端 `initializeAppWithData` API，並重構前端 `Index.html` 以建立並依賴全局快取 `appDataCache`。"
     status: "Done"
-    changedFiles: 
-      - "Index.html"
-  - logType: "PROGRESS"
-    taskId: "8.1-T2"
-    description: "重構：全面盤點並修改 Index.html 中所有 google.script.run 的呼叫點。"
-    status: "Done"
-    changedFiles:
-      - "Index.html"
-      - "code.gs"
+    changedFiles: ["code.gs", "Index.html"]
 ---
-storyId: "8.2"
-storyTitle: "作為一名 QA 工程師，我希望能完成第三次迭代中所有待定的（PENDING）測試，並將其納入自動化測試流程，以便我們能對核心功能的穩定性有信心，並提升未來迴歸測試的效率。"
+storyId: "10.1"
+storyTitle: "作為一名系統維護者，我希望能執行一個一次性的遷移腳本，將所有儲存在 Google Sheets `raw_content` 欄位中的產物內容，安全地遷移至指定的 GitHub Repository。"
 acceptanceCriteriaStatus:
-  - id: "AC-8.2-1"
+  - id: "AC-10.1-1"
     status: "Fulfilled"
-    verificationNote: "Vibe CEO 已確認，涵蓋 4 個核心函式 (`parseIterationReport`, `saveIdea`, `getFilesByRoleId`, `getColumnIndex`) 的 5 個自動化測試案例（其中 `saveIdea` 包含成功與失敗兩個案例）已全部建立。"
-  - id: "AC-8.2-2"
+    verificationNote: "Vibe CEO 已確認 `migrateContentToGitHub` 函式已建立。"
+  - id: "AC-10.1-2"
     status: "Fulfilled"
-    verificationNote: "Vibe CEO 已手動觸發 `runAllTests` 函式，並確認所有 5 個測試都成功通過，且在執行紀錄中輸出了清晰的 `✅ PASS` 報告。"
+    verificationNote: "Vibe CEO 已成功手動執行遷移腳本，並確認 `Artifacts` 表中的 `github_file_url` 和 `github_commit_hash` 欄位被成功填充。"
+  - id: "AC-10.1-3"
+    status: "Fulfilled"
+    verificationNote: "Vibe CEO 已確認 Sheets 中的 URL 能正確連結到 GitHub 上內容一致的檔案。"
 testingLog:
   - level: "使用者驗收測試 (UAT)"
-    method: "由 Vibe CEO 在 Google Apps Script 編輯器中手動執行 `runAllTests` 函式，並回報最終的日誌結果。"
-    result: "通過，5 passed, 0 failed."
+    method: "由 Vibe CEO 在 GAS 編輯器中手動執行遷移腳本，並檢查 Google Sheets 與 GitHub 的數據結果。"
+    result: "通過，執行日誌顯示『成功: 5，跳過: 8』，符合預期。"
 developerLog:
   - logType: "PROGRESS"
-    taskId: "8.2-T1"
-    description: "研究與準備：選擇並引入了 QUnit for GAS 測試框架，並將其整合至新的 `TestRunner.gs` 腳本檔案中。"
+    taskId: "10.1-T1"
+    description: "開發：撰寫 `migrateContentToGitHub` 函式，並提供 `setupGitHubCredentials` 供 Vibe CEO 設定認證。"
     status: "Done"
-    changedFiles:
-      - "TestRunner.gs"
-  - logType: "IMPLICIT_ITERATION"
-    taskId: "8.2-T2, 8.2-T3, 8.2-T4"
-    description: |
-      開發與除錯：為 4 個核心函式撰寫了 5 個測試案例，並與 Vibe CEO 多次協作，反覆除錯並強化了 Mock 框架的穩定性，最終成功讓所有測試通過。測試範圍涵蓋以下核心函式：
-      - `parseIterationReport`: 負責解析結構複雜的 YAML 格式迭代報告，從中提取關鍵摘要資訊。
-      - `saveIdea`: 處理將新的想法寫入 Google Sheets 的邏輯，並包含對無效內容（例如空白）的驗證。
-      - `getFilesByRoleId`: 根據角色 ID 從資料庫中查詢對應的產出物文件，並判斷其是否存在。
-      - `getColumnIndex`: 一個核心輔助函式，用於安全地從工作表的標題行中查找特定欄位的索引位置。
+    changedFiles: ["code.gs"]
+---
+storyId: "10.2"
+storyTitle: "作為一名使用者，當我點擊流程圖中的一個節點時，我希望能從 GitHub 無縫地載入並看到該產物的最新內容。"
+acceptanceCriteriaStatus:
+  - id: "AC-10.2-1"
+    status: "Fulfilled"
+    verificationNote: "Vibe CEO 已確認，點擊節點時會觸發 `getArtifactContent` API。"
+  - id: "AC-10.2-2"
+    status: "Fulfilled"
+    verificationNote: "Vibe CEO 已透過後端偵錯日誌確認，內容是優先從 GitHub 成功載入並顯示於前端。"
+  - id: "AC-10.2-3"
+    status: "Fulfilled"
+    verificationNote: "函式中已包含對 GitHub API 錯誤（如 404 Not Found）的處理機制。"
+testingLog:
+  - level: "使用者驗收測試 (UAT)"
+    method: "由 Vibe CEO 透過加入偵錯日誌的函式版本，進行端對端測試，以驗證內容的真實來源。"
+    result: "通過，日誌明確顯示內容來源為 GitHub。"
+developerLog:
+  - logType: "PROGRESS"
+    taskId: "10.2-T1"
+    description: "重構：修改後端 `getArtifactContent` 函式，使其具備優先從 GitHub 讀取內容的能力，並向下相容舊有資料。"
     status: "Done"
-    developerNotes: "這次的除錯過程非常有價值，我們不僅完成了測試案例，更建立了一個未來可以信賴、可擴展的自動化測試基礎。"
+    changedFiles: ["code.gs"]
+---
+storyId: "10.3"
+storyTitle: "作為一名使用者，當我上傳或更新一個產物時，我希望能將文件內容安全地儲存到 GitHub，並在 Google Sheets 中更新其索引，以便完成一次完整的產物版本迭代。"
+acceptanceCriteriaStatus:
+  - id: "AC-10.3-1"
+    status: "Fulfilled"
+    verificationNote: "Vibe CEO 已確認，上傳檔案時，前端會呼叫 `createOrUpdateArtifact` API。"
+  - id: "AC-10.3-2"
+    status: "Fulfilled"
+    verificationNote: "Vibe CEO 已透過後端日誌與前端 UI 驗證，檔案內容成功 commit 至 GitHub，且 Google Sheets 中的索引（URL 與 commit hash）也被正確更新。"
+  - id: "AC-10.3-3"
+    status: "Fulfilled"
+    verificationNote: "在共同除錯過程中，已驗證若 GitHub 操作失敗，Sheets 不會變更。後端函式中也已加入針對 Sheets 寫入失敗的災難恢復日誌。"
+testingLog:
+  - level: "協作除錯與 UAT"
+    method: "由 Vibe CEO 與開發者共同進行，透過日誌分析與前端 UI 互動，修復了上傳失敗與 UI 迴歸問題。"
+    result: "通過，所有上傳與更新功能恢復正常，UI 狀態顯示正確。"
+developerLog:
+  - logType: "TACTICAL_FIX"
+    taskId: "10.3-T1"
+    description: "修復：與 Vibe CEO 協作，由 CEO 提供了關鍵的 `createOrUpdateArtifact` 函式重構版本，並優化了 `syncToGitHub` 函式以完美配合，成功穩定後端上傳邏輯。"
+    status: "Done"
+    developerNotes: "最初的上傳邏輯存在缺陷，Vibe CEO 提供的版本更具健壯性，是本次修復的核心。"
     changedFiles:
-      - "TestRunner.gs"
       - "code.gs"
+  - logType: "TACTICAL_FIX"
+    taskId: "10.3-T3"
+    description: "修復：重構前端 `renderProcessDiagram` 函式，透過 `setAttribute` 正確設定 SVG 的 class，並修復 `handleFileSelect` 的快取更新邏輯，解決了 UI 狀態無法顯示與無法重複上傳的迴歸性問題。"
+    status: "Done"
+    changedFiles:
+      - "Index.html"
 
