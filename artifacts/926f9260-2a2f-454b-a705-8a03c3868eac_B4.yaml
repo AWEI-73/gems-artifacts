@@ -1,0 +1,76 @@
+projectId: "GEMS - 視覺化敏捷流程管理工具"
+sprintId: 1
+sprintGoal: "完成 MVP 的核心功能，建立一個可運作的前後端應用，讓使用者能建立專案、上傳產物並查看內容。"
+version: "1.0"
+status: "Approved"
+
+stories:
+  - storyId: "1.1"
+    storyTitle: "作為一個專案經理，我想要建立一個新專案並為它命名，以便開始追蹤這個專案的所有產出物。"
+    acceptanceCriteria:
+      - id: "AC-1.1-1"
+        description: "介面上有一個『新增專案』的按鈕。"
+      - id: "AC-1.1-2"
+        description: "點擊按鈕後，輸入專案名稱並提交，一筆新的紀錄會出現在 Google Sheets 的 `Projects` 工作表中。"
+    requiredTests: []
+    tasks:
+      - taskId: "1.1-T1"
+        type: "Fullstack"
+        description: "開發：完成建立新專案的完整流程。"
+        fulfills: ["AC-1.1-1", "AC-1.1-2"]
+
+  - storyId: "1.2"
+    storyTitle: "作為一個團隊成員，我想要在打開應用時，能看到一個基於 Mermaid.txt 的標準開發流程圖，以便我能了解整個開發流程的各個階段。"
+    acceptanceCriteria:
+      - id: "AC-1.2-1"
+        description: "網頁左側區域成功渲染出一個流程圖。"
+      - id: "AC-1.2-2"
+        description: "圖中的節點（如 B1, B2, B3）應是可點擊的。"
+    requiredTests: []
+    tasks:
+      - taskId: "1.2-T1"
+        type: "Frontend"
+        description: "開發：完成在前端渲染可互動的 Mermaid 流程圖。"
+        fulfills: ["AC-1.2-1", "AC-1.2-2"]
+
+  - storyId: "2.1"
+    storyTitle: "作為一個開發者，我想要點擊流程圖中的一個文件節點（例如 B5: sprint fillback），以便上傳我完成的 YAML 工作日誌。"
+    acceptanceCriteria:
+      - id: "AC-2.1-1"
+        description: "點擊任一文件節點後，會彈出一個標準的檔案選擇對話框。"
+      - id: "AC-2.1-2"
+        description: "選擇 YAML 檔案並確認後，檔案內容會被傳送到後端 Google Apps Script 進行處理。"
+    requiredTests: []
+    tasks:
+      - taskId: "2.1-T1"
+        type: "Fullstack"
+        description: "開發：完成點擊節點上傳 YAML 文件的流程。"
+        fulfills: ["AC-2.1-1", "AC-2.1-2"]
+
+  - storyId: "2.2"
+    storyTitle: "作為一個系統，當收到上傳的 YAML 文件後，我需要將其內容及關聯資訊儲存到 Google Sheet，以便永久保存紀錄。"
+    acceptanceCriteria:
+      - id: "AC-2.2-1"
+        description: "後端函式成功接收到檔案內容。"
+      - id: "AC-2.2-2"
+        description: "一筆新的紀錄被新增到 `Artifacts` 工作表中，其中 `raw_content` 包含完整的 YAML 文本，且 `project_id` 和 `node_id` 欄位被正確填寫。"
+    requiredTests: []
+    tasks:
+      - taskId: "2.2-T1"
+        type: "Backend"
+        description: "開發：完成後端儲存 YAML 產物至 Google Sheets 的邏輯。"
+        fulfills: ["AC-2.2-1", "AC-2.2-2"]
+
+  - storyId: "2.3"
+    storyTitle: "作為一個品管師，我想要點擊一個已經上傳過 QA 報告的節點（B6），以便在畫面右側看到報告的完整內容以進行審核。"
+    acceptanceCriteria:
+      - id: "AC-2.3-1"
+        description: "點擊一個節點時，系統會檢查 `Artifacts` 表中是否存在對應的紀錄。"
+      - id: "AC-2.3-2"
+        description: "如果存在紀錄，畫面右側的內容區會顯示該紀錄的 `raw_content`。"
+    requiredTests: []
+    tasks:
+      - taskId: "2.3-T1"
+        type: "Fullstack"
+        description: "開發：完成點擊節點後，讀取並顯示已上傳的 YAML 內容。"
+        fulfills: ["AC-2.3-1", "AC-2.3-2"]
