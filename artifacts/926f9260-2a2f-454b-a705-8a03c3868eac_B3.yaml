@@ -1,30 +1,48 @@
 # ===================================================================
 # GEMS - MVP Blueprint v3
 # ===================================================================
-# Iteration: 3
-# Focus: 核心導航、互動式儀表板升級與使用者體驗優化
+# Iteration: 4
+# Focus: 平台穩定性與品質保證鞏固 (Platform Stability & QA Fortification)
 # ===================================================================
 
 projectInfo:
   projectName: "GEMS - 視覺化敏捷流程管理工具"
-  executiveSummary: "一個基於 Google Apps Script 和 Google Sheets 的輕量級網頁應用，旨在將定義好的敏捷開發流程視覺化。它透過互動式流程圖來管理各階段產出的 YAML 文件，提供團隊一個清晰、集中且可追溯的專案儀表板。"
-  sprintGoal: "新增跨專案導航的下拉式選單。同時，將目前的靜態流程圖重構為一個可互動、可摺疊的全景儀表板，並開發 YAML 內容摘要與『創意牆』筆記功能，全面提升核心導航與資訊獲取效率。"
+  executiveSummary: "一個基於 Google Apps Script 和 Google Sheets 的輕量級網頁應用，旨在將定義好的敏捷流程視覺化。它透過互動式流程圖來管理各階段產出的 YAML 文件，提供團隊一個清晰、集中且可追溯的專案儀表板。"
+  sprintGoal: "償還第三次迭代中發現的關鍵技術債。核心任務是建立一個全局的初始化框架以根除競態條件問題，並完成所有待定的自動化測試，以確保平台在擴展新功能前具備穩固的品質基礎。"
+  version: "v3"
 
-technicalConsiderations:
-  platforms: "網頁應用，主要透過桌面瀏覽器訪問。"
-  technologyPreferences: "後端使用 Google Apps Script，資料庫使用 Google Sheets，前端使用 HTML Service 搭配 JavaScript/CSS。"
-  integrationNeeds: "無新增外部 API 整合需求。"
+# --- 商業分析 (Business Analysis - BA Scope) ---
+businessAnalysis:
+  targetAudience:
+    - persona: "Vibe CEO / 產品負責人"
+      needs: "需要一個穩定可靠的平台來規劃、追蹤和審視專案進度，不能因為底層技術問題而中斷工作流程。"
+    - persona: "開發團隊"
+      needs: "需要一個健壯的開發框架和可靠的自動化測試，以確保他們能專注於交付功能，而不是反覆修復基礎設施問題。"
+  successMetrics:
+    - id: "SM-4.1"
+      metric: "初始化穩定性"
+      target: "修復後，應用程式在各種網路條件下初始化失敗率應低於 1%。 (對應 NFR7)"
+    - id: "SM-4.2"
+      metric: "測試覆蓋率"
+      target: "第三次迭代交付的核心功能的端對端測試覆蓋率應達到 90% 以上。 (對應 NFR8)"
+  coreBusinessValue:
+    - value: "提升產品可靠性"
+      description: "從根本上解決已知的穩定性問題，為使用者提供一個更值得信賴的工具。"
+    - value: "加速未來開發"
+      description: "建立自動化測試的安全網，讓團隊未來可以更快、更自信地發布新功能，降低迴歸風險。"
 
-constraintsAndRisks:
-  constraints: "需在 Google Apps Script 的執行時間與效能限制下運作。"
-  risks:
-    - "風險一: 隨著專案與產物數量增長，Google Sheets 作為資料庫可能遇到讀寫效능瓶頸。"
-    - "風險二: 外部 API (GitHub) 的穩定性與網路延遲，可能影響產物同步的成功率與使用者體驗。"
-    - "風險三: 全景儀表板的互動邏輯較為複雜，可能增加前端 JavaScript 的開發與測試成本，並對 GAS 的渲染效能帶來挑戰。"
-
+# --- 系統架構 (System Architecture - SA Scope) ---
+# [Vibe CEO 指示] 本次迭代的核心是系統結構，此處提供百分之百完整的資訊。
 architecture:
   highLevelArchitecture:
-    architecturalStyle: "採用 Google Apps Script 作為後端的 Serverless Web App 架構。"
+    architecturalStyle: "採用 Google Apps Script 作為後端的 Serverless Web App 架構，前端使用 HTML Service 進行渲染。"
+    architecturalPrinciples:
+      - principle: "Serverless 優先"
+        description: "最大化利用 Google 的無伺服器基礎設施 (Apps Script, Sheets)，以最小化維運成本。"
+      - principle: "數據與邏輯分離"
+        description: "後端 Apps Script (`.gs` 檔案) 專注於業務邏輯，數據完全儲存在 Google Sheets 中。"
+      - principle: "單一職責"
+        description: "每個後端函式應只做一件事，並做好。前端元件也應遵循此原則，以利於測試與維護。"
     systemDiagram: |
       graph TD;
           A[使用者瀏覽器] --> B[HTML Service (UI)];
@@ -32,113 +50,192 @@ architecture:
           C -- SpreadsheetApp --> D[Google Sheets (Database)];
           C -- UrlFetchApp --> E[GitHub API];
           C -- PropertiesService --> F[Script Properties];
-    frontendBackendIntegration: "前端透過 `google.script.run` 呼叫後端的 Apps Script 函式，進行資料的讀寫與外部服務的觸發。"
+    frontendBackendIntegration:
+      method: "`google.script.run`"
+      description: "前端 JavaScript 透過 `google.script.run` 非同步呼叫後端的 `.gs` 函式。所有數據都以 JSON 格式在兩端之間傳遞。此機制是系統的核心互動方式，也是本次迭代穩定性工作的焦點。"
+
   techStack:
     - category: "Backend Runtime"
       technology: "Google Apps Script"
+      version: "V8 Runtime"
+      reason: "核心後端運行環境，與 Google Workspace 無縫整合。"
     - category: "Database"
       technology: "Google Sheets"
+      reason: "核心資料儲存方案，對小型專案而言易於管理和視覺化。"
     - category: "Frontend"
       technology: "HTML Service (HTML/CSS/JS)"
+      reason: "Google Apps Script 原生的前端渲染技術。"
     - category: "Diagram Rendering"
       technology: "Inline SVG (Componentized)"
+      reason: "輕量且可自定義的流程圖渲染方案，已在先前迭代中元件化。"
     - category: "External Services"
       technology: "GitHub API"
+      reason: "用於版本控制與產物同步。"
+    - category: "Key Libraries"
+      technology: "js-yaml"
+      reason: "用於在後端高效解析 YAML 文件內容，以支援摘要生成等功能。"
+    - category: "UI Frameworks"
+      technology: "Bootstrap (CSS/JS)"
+      reason: "用於快速建構標準化的 UI 元件，如按鈕和下拉選單。"
+    - category: "Testing Frameworks"
+      technology: "QUnit for GAS (or similar)"
+      reason: "[本次迭代引入] 引入社群驗證的測試框架，以建立結構化、可重複執行的後端單元與整合測試。"
+
   dataModels:
     - modelName: "Projects"
-      description: "儲存專案的清單與基本資訊。"
+      description: "儲存專案的清單與基本資訊。支援跨專案導航功能。"
       fields:
-        project_id: "string (Primary Key)"
-        project_name: "string"
+        - name: "project_id"
+          type: "string (Primary Key)"
+        - name: "project_name"
+          type: "string"
+        - name: "status"
+          type: "string"
+        - name: "created_at"
+          type: "Timestamp"
     - modelName: "Artifacts"
-      description: "儲存所有上傳的產物（YAML 文件）及其元數據。"
-    - modelName: "Ideas"
-      description: "儲存來自『創意牆』的文字筆記。"
+      description: "儲存所有上傳的產物（YAML 文件）及其元數據，支援版本控制與 GitHub 同步。"
       fields:
-        idea_id: "string (Primary Key)"
-        content: "string"
-        created_at: "Timestamp"
+        - name: "artifact_id"
+          type: "string (Primary Key)"
+        - name: "project_id"
+          type: "string (Foreign Key)"
+        - name: "node_id"
+          type: "string"
+        - name: "artifact_type"
+          type: "string"
+        - name: "related_artifact_id"
+          type: "string"
+        - name: "status"
+          type: "string"
+        - name: "version"
+          type: "string"
+        - name: "key_info_1"
+          type: "string"
+        - name: "key_info_2"
+          type: "string"
+        - name: "raw_content"
+          type: "string (Full YAML text)"
+        - name: "github_file_url"
+          type: "string"
+        - name: "github_commit_hash"
+          type: "string"
+        - name: "created_at"
+          type: "Timestamp"
+    - modelName: "Ideas"
+      description: "儲存來自『創意牆』的文字筆記，支援快速記錄與查詢。"
+      fields:
+        - name: "idea_id"
+          type: "string (Primary Key)"
+        - name: "project_id"
+          type: "string (Foreign Key)"
+        - name: "content"
+          type: "string"
+        - name: "created_at"
+          type: "Timestamp"
+        - name: "created_by"
+          type: "string"
+        - name: "status"
+          type: "string"
+        - name: "tags"
+          type: "string (Comma-separated)"
 
+  coreFunctionStrategy:
+    - function: "全局初始化框架 (Global Initialization Framework)"
+      strategy: "建立一個集中的非同步初始化模組 (`initialization.js`)，作為所有後端 API 呼叫的守門員。此模組將管理一個狀態標記 (e.g., `isReady`)，並提供一個 Promise-based 的方法 (`whenReady()`) 供其他模組調用，確保在 API 完全就緒前，所有請求都會被延遲執行。"
+      performanceConsiderations: "此框架會導致首次 API 呼叫增加微小的延遲，但能根除因競態條件導致的隨機、長時間的失敗等待，整體使用者體驗將大幅提升。"
+      securityConsiderations: "無直接安全影響，但一個穩定的初始化流程是後續安全功能（如動態載入權限）的基礎。"
+      testingStrategy:
+        riskLevel: "P0 (最高)"
+        requiredTests:
+          - type: "Unit Test"
+            description: "驗證 `whenReady()` 在 API 未就緒時是否會正確等待，在 API 就緒後是否會立即 resolve。"
+          - type: "Integration Test"
+            description: "驗證 `google.script.run` 的呼叫是否能被 `whenReady()` 正確包裹並成功執行。"
+          - type: "E2E Test"
+            description: "使用瀏覽器開發者工具模擬慢速網路 (Slow 3G)，驗證在長時間延遲後，頁面功能依然能正常初始化並運作，且控制台無 `google is not defined` 錯誤。"
+
+    - function: "自動化測試框架 (Automated Testing Framework)"
+      strategy: "引入社群成熟的 Google Apps Script 測試框架 (如 Gas-Simple-Scaffold 或 QUnit for GAS)，為第三次迭代交付的核心後端函式建立可重複執行的測試案例。測試將在一個專用的 Google Sheet 中運行，並輸出結構化的測試報告。"
+      performanceConsiderations: "測試執行會消耗 Apps Script 的每日配額，但僅在開發與部署階段執行，對線上使用者無影響。"
+      securityConsiderations: "測試案例不應包含任何生產環境的敏感金鑰或數據。所有測試都應在獨立的測試用 Google Sheet 上運行。"
+      testingStrategy:
+        riskLevel: "P1 (高)"
+        requiredTests:
+          - type: "Unit Test"
+            description: "為 `parseIterationReport` 的報告解析邏輯建立單元測試，驗證其是否能正確提取關鍵欄位。"
+          - type: "Integration Test"
+            description: "為 `getFilesByRoleId`, `saveIdea`, `switchProject` 等涉及 Google Sheets 讀寫的函式建立整合測試，驗證其資料庫互動的正確性。"
+
+  deploymentAndOperations:
+    deploymentProcess: "建議使用 `clasp` (Command Line Apps Script Projects) 進行本地開發與版本控制 (Git)。部署流程為：本地開發 -> Git Commit -> `clasp push` 推送至 Apps Script 平台。"
+    loggingAndMonitoring: "所有後端的 `console.log` 輸出都會自動記錄在 Google Cloud Platform 的 Stackdriver Logging 中，作為錯誤排查與監控的主要手段。"
+
+# --- 第四次迭代規劃 (PS Scope) ---
 requirements:
   inScope:
-    - id: "FR10"
-      description: "系統需將靜態流程圖重構為三個可獨立展開/摺疊的主要階段：『藍圖規劃』、『衝刺循環』、『迭代學習』。"
-    - id: "FR11"
-      description: "在每個階段內，主要的圖表節點應代表『角色 (Role)』。"
-    - id: "FR12"
-      description: "使用者點擊任一『角色』節點後，系統需能顯示或連結至該角色負責產出的『文件 (Document)』列表。"
-    - id: "FR13"
-      description: "系統後端需能解析上傳的 YAML 內容，並在前端針對特定文件類型顯示一個包含關鍵欄位的摘要區塊。"
-    - id: "FR14"
-      description: "畫面中需提供一個浮動按鈕，使用者點擊後可快速輸入文字筆記，並將其儲存至 Google Sheets 的新工作表中。"
-    - id: "FR15"
-      description: "UI 頂部需提供一個下拉式選單，用於顯示並切換不同的專案。"
+    - id: "FR16"
+      description: "系統必須建立一個可複用的初始化模組，確保所有客戶端 API 呼叫在 Google API 腳本完全載入後才執行。"
+    - id: "FR17"
+      description: "系統必須完成所有在第三次迭代中被標記為 PENDING 的效能、整合與端對端測試。"
+    - id: "FR18"
+      description: "系統應建立初步的自動化測試腳本，以覆蓋本次完成的測試案例。"
   outOfScope:
-    - "優化 GitHub API 的錯誤處理與前端回饋機制。"
-    - "將 SVG 佈局優化（如節點尺寸、間距）進行標準化參數配置。"
-    - "創意牆筆記的進階管理功能（如編輯、刪除、標籤分類）。"
+    - id: "OOS-004"
+      description: "本次迭代不開發任何新的使用者可見功能（如創意牆進階管理）。"
   nonFunctional:
-    - id: "NFR5"
-      description: "全景儀表板的互動操作（展開/摺疊）應在 500 毫秒內完成視覺響應，確保流暢的使用者體驗。"
-    - id: "NFR6"
-      description: "後端的 YAML 解析不應阻塞主執行緒，確保在處理大型文件時 UI 依然保持響應。"
+    - id: "NFR7"
+      description: "修復後，應用程式在各種網路條件下初始化失敗率應低於 1%。"
+    - id: "NFR8"
+      description: "核心功能（地圖載入、切換專案）的端對端測試覆蓋率應達到 90% 以上。"
 
 epicsAndStories:
-  - epic: "Epic 5: 互動式全景儀表板升級"
+  - epic: "Epic 8: 平台穩定性與品質保證鞏固"
+    description: "此史詩專注於償還關鍵技術債並鞏固產品質量。目標是建立一個更穩健的底層架構和更可靠的測試保障，為未來的快速功能迭代鋪平道路。"
     stories:
-      - id: "5.1"
-        story: "作為一個 Vibe CEO，我希望將流程圖重構成三個可摺疊的主要階段，以便我可以專注於當前的專案階段，而不會被整個複雜的流程分散注意力。"
-        sourceLog: "Iteration 2 Closing Report (NIC-S2-005)"
+      - id: "8.1"
+        story: "作為一名開發者，我希望能建立一個全局的初始化框架，並將現有的 `initializeApp` 函式標準化，以便能從根本上解決 Google API 的競態條件問題，確保應用的穩定性。"
+        sourceLog: "Iteration 3 Closing Report (NIC-S3-001, NIC-S3-004)"
         acceptanceCriteria:
-          - id: "AC-5.1-1"
-            description: "流程圖在初始載入時，應顯示為『藍圖規劃』、『衝刺循環』、『迭代學習』三個摺疊起來的階段標題。"
-          - id: "AC-5.1-2"
-            description: "點擊任一階段標題，可以平滑地展開該階段的詳細流程（角色節點），同時其他階段保持摺疊。"
-          - id: "AC-5.1-3"
-            description: "再次點擊已展開的階段標題，可以將其重新摺疊。"
-      - id: "5.2"
-        story: "作為一個團隊成員，我希望在點擊一個『角色』節點後，能看到他所負責產出的所有『文件』，以便我能快速地找到並查閱相關的專案產物。"
-        sourceLog: "Iteration 2 Closing Report (NIC-S2-005)"
-        acceptanceCriteria:
-          - id: "AC-5.2-1"
-            description: "點擊任一『角色』節點，會在其下方或旁邊彈出一個列表，清晰地展示該角色對應的『文件』名稱。"
-          - id: "AC-5.2-2"
-            description: "點擊文件列表中的某個項目，如果該文件已存在，則其內容會被載入到右側的內容顯示區。"
-          - id: "AC-5.2-3"
-            description: "如果文件不存在，點擊後應有明確的提示（例如按鈕變灰或顯示『尚未產出』的工具提示）。"
+          - id: "AC-8.1-1"
+            description: "建立一個新的 `initialization.js` 模組，負責管理所有 API 的載入與準備狀態。"
+          - id: "AC-8.1-2"
+            description: "所有原先直接呼叫 `google.script.run` 的地方，都必須先通過此初始化模組的狀態檢查。"
+          - id: "AC-8.1-3"
+            description: "經過壓力測試，在模擬慢速網路環境下，不會再出現 `google is not defined` 的錯誤。"
+        requiredTests: # 轉譯自 coreFunctionStrategy
+          - type: "Unit Test"
+            description: "驗證 `whenReady()` 函式的核心等待與解析邏輯。"
+          - type: "E2E Test"
+            description: "模擬慢速網路，驗證頁面初始化流程的端對端穩定性。"
+        relatedFunctions:
+          - "initializeApp()"
+          - "All functions using google.script.run"
+        affectedDataModels:
+          - "None"
 
-  - epic: "Epic 6: 使用者體驗與資訊可及性優化"
-    stories:
-      - id: "6.1"
-        story: "作為一個 Vibe CEO，當我檢視一份『迭代學習報告』的 YAML 產物時，我希望能直接在頂部看到一個摘要，包含最終狀態和下次迭代候選項目數量，以便我能快速掌握最重要的結論。"
-        sourceLog: "Iteration 2 Closing Report (NIC-S2-001)"
+      - id: "8.2"
+        story: "作為一名 QA 工程師，我希望能完成第三次迭代中所有待定的（PENDING）測試，並將其納入自動化測試流程，以便我們能對核心功能的穩定性有信心，並提升未來迴歸測試的效率。"
+        sourceLog: "Iteration 3 Closing Report (NIC-S3-009)"
         acceptanceCriteria:
-          - id: "AC-6.1-1"
-            description: "當載入的 YAML 文件類型為 `Iteration_Closing_Report.yaml` 時，後端有一個函式能解析其內容。"
-          - id: "AC-6.1-2"
-            description: "在前端內容顯示區的頂部，會出現一個視覺上突出的摘要框。"
-          - id: "AC-6.1-3"
-            description: "摘要框中至少需包含 `finalStatus` 和 `nextIterationCandidates` 的總數量這兩個關鍵資訊。"
-      - id: "6.2"
-        story: "作為一個團隊成員，我希望在畫面上隨時有一個『創意牆』的入口，讓我可以隨時記錄下突發奇想或回饋，而不需要切換頁面或打斷當前思路。"
-        sourceLog: "Iteration 2 Closing Report (NIC-S2-002)"
-        acceptanceCriteria:
-          - id: "AC-6.2-1"
-            description: "畫面右下角始終顯示一個浮動的 icon 按鈕。"
-          - id: "AC-6.2-2"
-            description: "點擊該按鈕會彈出一個簡易的文字輸入框與『儲存』按鈕。"
-          - id: "AC-6.2-3"
-            description: "輸入文字並點擊儲存後，內容會被寫入到 Google Sheets 一個名為 `Ideas` 的新工作表中，前端同時給予操作成功的提示。"
+          - id: "AC-8.2-1"
+            description: "針對第三次迭代交付的核心後端函式，都已有對應的自動化測試案例。"
+          - id: "AC-8.2-2"
+            description: "自動化測試腳本可以被手動觸發，並在控制台或日誌中輸出清晰的測試報告。"
+        requiredTests: # 轉譯自 coreFunctionStrategy
+          - type: "Unit Test"
+            description: "涵蓋 `parseIterationReport` 函式的 YAML 解析邏輯。"
+          - type: "Integration Test"
+            description: "涵蓋 `getFilesByRoleId` 函式的資料庫查詢邏輯。"
+          - type: "Integration Test"
+            description: "涵蓋 `saveIdea` 函式的資料庫寫入邏輯。"
+        relatedFunctions:
+          - "getFilesByRoleId"
+          - "parseIterationReport"
+          - "saveIdea"
+          - "switchProject"
+        affectedDataModels:
+          - "Projects"
+          - "Artifacts"
+          - "Ideas"
 
-  - epic: "Epic 7: 核心 UI 導航增強"
-    stories:
-      - id: "7.1"
-        story: "作為一個使用者，我希望在 UI 頂部有一個下拉式選單，裡面列出所有專案的名稱，讓我可以直接選擇並切換到不同的專案儀表板。"
-        sourceLog: "Vibe CEO's new directive during Iteration 3 planning"
-        acceptanceCriteria:
-          - id: "AC-7.1-1"
-            description: "應用程式載入時，會從後端讀取 Google Sheets 中 `Projects` 工作表的所有專案清單。"
-          - id: "AC-7.1-2"
-            description: "UI 頂部的一個固定位置（如 Header 區域）會顯示一個下拉式選單元件，選單中顯示所有專案的名稱 (`project_name`)。"
-          - id: "AC-7.1-3"
-            description: "從下拉式選單中選擇一個不同的專案後，主畫面的儀表板內容（流程圖、產物列表等）會被刷新，以顯示所選專案的資料。"
