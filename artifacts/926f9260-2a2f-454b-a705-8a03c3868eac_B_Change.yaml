@@ -1,0 +1,51 @@
+proposalId: "SCP-GEMS-001"
+sprintId: 1
+status: "PendingApproval" # 狀態等待 Vibe CEO 批准
+
+# --- 第一項變更 ---
+changeType: "TACTICAL_FIX"
+trigger:
+  type: "Technical Issue"
+  reportedBy: "Dev Team"
+  date: "2025-09-05"
+  description: "在任務 1.2-T1 中，原定使用的 Mermaid.js 函式庫在 Google Apps Script 環境下渲染不穩定且難以綁定事件。"
+impactAnalysis:
+  sprintGoalImpact: "無。核心功能『顯示流程圖』不受影響，但實現方式變更。"
+  summary: "為了確保產品的長期穩定性，將流程圖的實現技術從外部函式庫改為原生 SVG。"
+changeScope:
+  - storyId: "1.2"
+    action: "NO_CHANGE"
+    tasks:
+      - taskId: "1.2-T1"
+        action: "MODIFY"
+        updates:
+          description: "開發：完成在前端渲染可互動的【原生 SVG】流程圖。"
+proposedSolution:
+  rationale: "原生 SVG 無外部依賴，執行效能更佳且在 Google Apps Script 環境中行為完全可控，是更穩健的長期解決方案。"
+
+---
+# --- 第二項變更 ---
+proposalId: "SCP-GEMS-002"
+sprintId: 1
+status: "PendingApproval" # 狀態等待 Vibe CEO 批准
+
+changeType: "IMPLICIT_ITERATION"
+trigger:
+  type: "Usability Improvement"
+  reportedBy: "Dev Team"
+  date: "2025-09-05"
+  description: "在任務 2.3-T1 中，發現當 YAML 產出物內容過長時，會超出畫面範圍導致無法閱讀完整內容。"
+impactAnalysis:
+  sprintGoalImpact: "無直接影響，但提升了核心功能的可用性 (Usability)。"
+  summary: "透過增加滾動條，確保使用者在任何情況下都能查看完整的產出物內容。"
+changeScope:
+  - storyId: "2.3"
+    action: "NO_CHANGE"
+    tasks:
+      - taskId: "opt-2.3-T2" # 新增一個優化任務
+        action: "ADD"
+        type: "Frontend"
+        description: "優化：為主要內容顯示區增加垂直滾動條。"
+        dependencies: ["2.3-T1"]
+proposedSolution:
+  rationale: "這是一個低成本、高回報的使用者體驗優化。在不影響原定計畫的前提下，解決了一個明顯的可用性問題，提升了產品的專業度。"
