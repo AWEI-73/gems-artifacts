@@ -1,49 +1,22 @@
-proposalId: "SCP-GEMS-003"
+proposalId: "SCP-GEMS-005"
 sprintId: 2
-status: "PendingApproval" # 狀態等待 Vibe CEO 批准
-
+status: "PendingApproval"
 changeType: "TACTICAL_FIX"
 trigger:
-  type: "Technical Issue"
-  reportedBy: "Vibe CEO / Dev Team"
+  type: "技術問題"
+  reportedBy: "開發團隊"
   date: "2025-09-06"
-  description: "在任務 3.1-T2 的實作過程中，發現前端呼叫的後端函式 `uploadFileContent` 不存在，導致檔案上傳流程完全失敗。" #
+  description: "在任務 7.1-T3 的實作過程中，發現因 Google API 未完全初始化而導致的競態條件問題，觸發了 'google is not defined' 錯誤。"
 impactAnalysis:
-  sprintGoalImpact: "無。此為必要修正，確保了衝刺目標中『完成與 GitHub API 的核心整合』功能的正常運作。"
-  summary: "修正了因前後端函式簽名不匹配而導致的通訊失敗問題，恢復了檔案上傳至後端的核心功能。"
+  sprintGoalImpact: "無。此修復確保了透過下拉選單實現順暢專案切換的衝刺目標得以穩定實現。"
+  summary: "透過引入 `initializeApp` 函式解決了競態條件問題，確保 Google API 在執行相關邏輯前已完全載入，從而提升應用程式的穩定性。"
 changeScope:
-  - storyId: "3.1"
-    action: "NO_CHANGE"
+  - storyId: "7.1"
+    action: "無變更"
     tasks:
-      - taskId: "3.1-T2"
-        action: "MODIFY"
+      - taskId: "7.1-T3"
+        action: "修改"
         updates:
-          description: "開發：實作核心同步邏輯...並修正後端入口點函式 `uploadFileContent` 以匹配前端 `google.script.run` 的呼叫。" #
+          description: "實作專案列表載入的雙層快取機制，並透過引入 `initializeApp` 函式修復競態條件問題，確保 Google API 在執行前已準備就緒。"
 proposedSolution:
-  rationale: "此問題阻礙了 Story 3.1 的核心功能交付。將後端入口點函式名調整為 `uploadFileContent(fileContent, nodeId)`，是解決前後端通訊失敗最直接且必要的手段，確保了功能的完整性。" #
-
----
-proposalId: "SCP-GEMS-004"
-sprintId: 2
-status: "PendingApproval" # 狀態等待 Vibe CEO 批准
-
-changeType: "IMPLICIT_ITERATION"
-trigger:
-  type: "Usability Improvement"
-  reportedBy: "Vibe CEO"
-  date: "2025-09-06"
-  description: "在任務 4.1-T3 的無迴歸測試期間，Vibe CEO 回饋流程圖節點尺寸過大，佈局不夠緊湊，影響了在有限空間內的可讀性。" #
-impactAnalysis:
-  sprintGoalImpact: "無直接影響，但提升了衝刺目標中『重構前端 SVG 渲染邏輯』的最終產出品質與使用者體驗。"
-  summary: "透過縮小節點尺寸與調整佈局，優化了 SVG 流程圖的視覺呈現，使其更加緊湊與易讀。"
-changeScope:
-  - storyId: "4.1"
-    action: "NO_CHANGE"
-    tasks:
-      - taskId: "opt-4.1-U1" # 新增一個優化任務 (Usability)
-        action: "ADD"
-        type: "Frontend"
-        description: "優化：將 SVG 節點寬度從 200px 調整為 180px，高度從 60px 調整為 50px，並重新計算座標以優化佈局。" #
-        dependencies: ["4.1-T2"]
-proposedSolution:
-  rationale: "這是一個低成本、高回報的使用者體驗優化。在不影響原定計畫的前提下，根據 CEO 的直接反饋解決了視覺佈局問題，顯著提升了產品的易用性與專業度。"
+  rationale: "競態條件問題導致專案列表載入和儀表板切換不可靠。引入 `initializeApp` 函式確保 Google API 完全初始化，從而解決錯誤並維護專案選擇功能的完整性。"
