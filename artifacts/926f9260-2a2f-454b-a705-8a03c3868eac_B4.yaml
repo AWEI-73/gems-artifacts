@@ -1,79 +1,74 @@
 projectId: "GEMS - 視覺化敏捷流程管理工具"
-sprintId: 4
-sprintGoal: "償還第三次迭代中發現的關鍵技術債。核心任務是建立一個全局的初始化框架以根除競態條件問題，並完成所有待定的自動化測試，以確保平台在擴展新功能前具備穩固的品質基礎。" #
-version: "3.0"
-status: "Approved"
+sprintId: 5
+sprintGoal: "啟動 GEMS 的核心架構升級。核心任務是實現前端快取以達成零延遲的 UI 互動，並將內容儲存後端重構至 GitHub，實現專業、可靠的版本控制，為平台未來的成長奠定基礎。"
+version: "3.3"
+status: "Proposed"
 
 # ===================================================================
-# NEW SECTION: Foundational Architecture & Principles
-# 目的：此區塊定義了本次衝刺所有開發任務必須遵守的核心架構原則與技術標準。
-# 來源：mvp_blueprint_v3.yaml
+# Foundational Architecture & Principles
+# 來源：mvp_blueprint_v3.yaml (無損轉譯)
 # ===================================================================
 foundationalArchitecture:
   highLevelArchitecture:
-    architecturalStyle: "採用 Google Apps Script 作為後端的 Serverless Web App 架構，前端使用 HTML Service 進行渲染。" #
-    architecturalPrinciples: #
-      - principle: "Serverless 優先" #
-        description: "最大化利用 Google 的無伺服器基礎設施 (Apps Script, Sheets)，以最小化維運成本。" #
-      - principle: "數據與邏輯分離" #
-        description: "後端 Apps Script (`.gs` 檔案) 專注於業務邏輯，數據完全儲存在 Google Sheets 中。" #
-      - principle: "單一職責" #
-        description: "每個後端函式應只做一件事，並做好。前端元件也應遵循此原則，以利於測試與維護。" #
-    systemDiagram: | #
+    architecturalStyle: "演進為『具備前端狀態的 Serverless Web App』架構。"
+    architecturalPrinciples:
+      - principle: "狀態前移 (Stateful Frontend, Stateless Backend)"
+        description: "將應用程式的『UI 狀態』移至前端瀏覽器中進行管理，後端專注於無狀態的數據 CRUD 操作。"
+      - principle: "索引與內容分離 (Index-Content Separation)"
+        description: "嚴格區分『元數據索引』（儲存於 Google Sheets）與『文件內容』（儲存於 GitHub），提升系統的模組化與擴展性。"
+    systemDiagram: |
       graph TD;
-          A[使用者瀏覽器] --> B[HTML Service (UI)];
+          A[使用者瀏覽-前端快取] --> B[HTML Service (UI)];
           B -- Client-side JS --> C{Google Apps Script (Server-side)};
-          C -- SpreadsheetApp --> D[Google Sheets (Database)];
-          C -- UrlFetchApp --> E[GitHub API];
-          C -- PropertiesService --> F[Script Properties];
-    frontendBackendIntegration: #
-      method: "`google.script.run`" #
-      description: "前端 JavaScript 透過 `google.script.run` 非同步呼叫後端的 `.gs` 函式。所有數據都以 JSON 格式在兩端之間傳遞。此機制是系統的核心互動方式，也是本次迭代穩定性工作的焦點。" #
+          C -- SpreadsheetApp (讀寫索引) --> D[Google Sheets (Metadata Index)];
+          C -- UrlFetchApp (讀寫內容) --> E[GitHub API v3 (Content Store)];
+          C -- PropertiesService --> F[Script Properties (API Keys)];
+    frontendBackendIntegration:
+      method: "`google.script.run`"
+      description: "前端 JavaScript 透過 `google.script.run` 非同步呼叫後端的 `.gs` 函式。本次迭代將引入前端快取機制，以大幅減少此類呼叫的頻率。"
 
-  techStack: #
-    - category: "Backend Runtime" #
-      technology: "Google Apps Script" #
-      version: "V8 Runtime" #
-    - category: "Database" #
-      technology: "Google Sheets" #
-    - category: "Frontend" #
-      technology: "HTML Service (HTML/CSS/JS)" #
-    - category: "Diagram Rendering" #
-      technology: "Inline SVG (Componentized)" #
-    - category: "External Services" #
-      technology: "GitHub API" #
-    - category: "Key Libraries" #
-      technology: "js-yaml" #
-    - category: "UI Frameworks" #
-      technology: "Bootstrap (CSS/JS)" #
-    - category: "Testing Frameworks" #
-      technology: "QUnit for GAS (or similar)" #
-      reason: "[本次迭代引入] 引入社群驗證的測試框架，以建立結構化、可重複執行的後端單元與整合測試。" #
+  techStack:
+    - category: "Frontend State Management"
+      technology: "In-memory JavaScript Object"
+      reason: "[本次迭代引入] 作為前端的『單一事實來源』，實現即時 UI 互動。"
+    - category: "Backend Runtime"
+      technology: "Google Apps Script (V8 Runtime)"
+      reason: "[未變更] 核心後端運行環境。"
+    - category: "Database"
+      technology: "Google Sheets"
+      reason: "[職責變更] 從主資料庫變更為『元數據索引 (Metadata Index)』。"
+    - category: "Content Store"
+      technology: "GitHub Repository (via REST API v3)"
+      reason: "[本次迭代引入] 作為所有 YAML 文件的主要儲存與版本控制系統。"
+    - category: "Key Libraries"
+      technology: "js-yaml"
+      reason: "[未變更] 用於在後端高效解析傳入的 YAML 文件內容。"
 
-  dataModels: #
-    - sheetName: "Projects" #
-      fields: #
+  dataModels:
+    - modelName: "Projects"
+      description: "儲存專案的清單與基本資訊。此模型在本次迭代中結構不變。"
+      fields:
         - { name: "project_id", type: "string (Primary Key)" }
         - { name: "project_name", type: "string" }
         - { name: "status", type: "string" }
         - { name: "created_at", type: "Timestamp" }
-    - sheetName: "Artifacts" #
-      fields: #
+    - modelName: "Artifacts"
+      description: "儲存所有產物的元數據索引。文件內容本身儲存在 GitHub。"
+      fields:
         - { name: "artifact_id", type: "string (Primary Key)" }
         - { name: "project_id", type: "string (Foreign Key)" }
         - { name: "node_id", type: "string" }
         - { name: "artifact_type", type: "string" }
-        - { name: "related_artifact_id", type: "string" }
-        - { name: "status", type: "string" }
         - { name: "version", type: "string" }
         - { name: "key_info_1", type: "string" }
         - { name: "key_info_2", type: "string" }
-        - { name: "raw_content", type: "string (Full YAML text)" }
-        - { name: "github_file_url", type: "string" }
-        - { name: "github_commit_hash", type: "string" }
+        - { name: "github_file_url", type: "string (NEW)" }
+        - { name: "github_commit_hash", type: "string (NEW)" }
         - { name: "created_at", type: "Timestamp" }
-    - sheetName: "Ideas" #
-      fields: #
+        - { name: "raw_content", type: "string (DEPRECATED - To be removed)" }
+    - modelName: "Ideas"
+      description: "儲存來自『創意牆』的文字筆記。此模型在本次迭代中結構不變。"
+      fields:
         - { name: "idea_id", type: "string (Primary Key)" }
         - { name: "project_id", type: "string (Foreign Key)" }
         - { name: "content", type: "string" }
@@ -83,108 +78,164 @@ foundationalArchitecture:
         - { name: "tags", type: "string (Comma-separated)" }
 
 # ===================================================================
-# Stories & Tasks for Sprint 4
+# Stories & Tasks for Sprint 5
 # ===================================================================
 stories:
-  - storyId: "8.1"
-    storyTitle: "作為一名開發者，我希望能建立一個全局的初始化框架，並將現有的 initializeApp 函式標準化，以便能從根本上解決 Google API 的競態條件問題，確保應用的穩定性。" #
-    technicalBrief: "此故事為本次迭代的最高優先級任務(P0)。核心是建立一個集中的非同步初始化模組 (`initialization.js`)，並重構所有 `google.script.run` 呼叫點，以根除競態條件，達成 NFR7 的穩定性要求。" #
+  - storyId: "9.1"
+    storyTitle: "作為一名使用者，我希望能一次性載入所有專案與產物的元數據到前端，以便在應用程式內進行任何導航或篩選操作時，都能獲得即時的 UI 反應，無需等待後端載入。"
+    technicalBrief: "核心是開發 `initializeAppWithCache()` API，一次性聚合所有元數據返回給前端，並建立前端快取機制，達成 UI 互動零延遲的目標。"
     technicalContext:
-      riskLevel: "P0 (最高)" #
+      riskLevel: "P1 (High)"
       relatedNFR:
-        - id: "NFR7"
-          description: "修復後，應用程式在各種網路條件下初始化失敗率應低於 1%。" #
+        - id: "NFR9"
+          description: "數據預載入後，前端 UI 互動的響應時間必須低於 100 毫秒。"
       architecture:
-        - component: "全局初始化框架 (Global Initialization Framework)" #
-          strategy: "建立一個集中的非同步初始化模組 (`initialization.js`)，作為所有後端 API 呼叫的守門員。此模組將管理一個狀態標記 (e.g., `isReady`)，並提供一個 Promise-based 的方法 (`whenReady()`) 供其他模組調用，確保在 API 完全就緒前，所有請求都會被延遲執行。" #
-          integrationMethod: "前端 JavaScript 透過 `google.script.run` 非同步呼叫後端的 `.gs` 函式。所有此類呼叫都必須被 `whenReady()` 方法包裹。" #
-          performanceConsiderations: "此框架會導致首次 API 呼叫增加微小的延遲，但能根除因競態條件導致的隨機、長時間的失敗等待，整體使用者體驗將大幅提升。" #
-          securityConsiderations: "無直接安全影響，但一個穩定的初始化流程是後續安全功能的基礎。" #
-      relatedFunctions: #
-        - "initializeApp()"
-        - "All functions using google.script.run"
+        - component: "initializeAppWithCache()"
+          strategy: "應用啟動時的唯一數據載入函式。查詢並聚合所有元數據（專案、產物），一次性返回給前端進行快取。"
+          performanceConsiderations: "此函式執行時間將直接影響應用初始載入速度，後端需優化 Google Sheets 的讀取操作（如使用 `getValues()` 一次性讀取）。"
+      relatedFunctions: ["initializeAppWithCache()"]
+      affectedDataModels: ["Projects", "Artifacts"]
     acceptanceCriteria:
-      - id: "AC-8.1-1"
-        description: "建立一個新的 `initialization.js` 模組，負責管理所有 API 的載入與準備狀態。" #
-      - id: "AC-8.1-2"
-        description: "所有原先直接呼叫 `google.script.run` 的地方，都必須先通過此初始化模組的狀態檢查。" #
-      - id: "AC-8.1-3"
-        description: "經過壓力測試，在模擬慢速網路環境下，不會再出現 `google is not defined` 的錯誤。" #
+      - { id: "AC-9.1-1", description: "應用程式啟動時，會呼叫一次 `initializeAppWithCache()` API，並將返回的完整元數據儲存在一個前端的 JavaScript 物件中。" }
+      - { id: "AC-9.1-2", description: "當我點擊「切換專案」下拉選單時，專案列表的切換是即時的，不應觸發任何對後端的 `google.script.run` 呼叫。" }
+      - { id: "AC-9.1-3", description: "當我選擇一個專案後，流程圖的渲染是即時的，其所需的產物元數據皆來自前端快取。" }
     requiredTests:
-      - type: "Unit Test"
-        description: "驗證 `whenReady()` 函式的核心等待與解析 logique，確保在 API 未就緒時會等待，就緒後立即 resolve。" #
       - type: "Integration Test"
-        description: "驗證 `google.script.run` 的呼叫是否能被 `whenReady()` 正確包裹並成功執行。" #
+        description: "驗證 `initializeAppWithCache()` 回傳的數據能被前端正確快取。"
       - type: "E2E Test"
-        description: "(對應 NFR7) 使用瀏覽器開發者工具模擬慢速網路 (Slow 3G)，驗證在長時間延遲後，頁面功能依然能正常初始化並運作。" #
+        description: "模擬使用者操作，驗證 UI 互動的即時性。"
     tasks:
-      - taskId: "8.1-T1"
+      - taskId: "9.1-T1"
         type: "Backend"
-        description: "開發：設計並實作 `initialization.js` 模組，包含狀態管理與 `whenReady()` Promise 函式。"
-        fulfills: ["AC-8.1-1"]
-      - taskId: "8.1-T2"
-        type: "Backend"
-        description: "重構：全面盤點並修改現有程式碼，將所有 `google.script.run` 的呼叫點都遷移至使用 `whenReady()` 進行前置檢查。"
-        fulfills: ["AC-8.1-2"]
-      - taskId: "8.1-T3"
+        description: "開發：實作後端 `initializeAppWithCache()` 函式，確保能一次性讀取並聚合 Sheets 中的 Projects 與 Artifacts 元數據。"
+        fulfills: ["AC-9.1-1"]
+      - taskId: "9.1-T2"
+        type: "Frontend"
+        description: "開發：建立前端快取機制 (in-memory JavaScript object)，並在應用啟動時呼叫 API 填充數據。"
+        fulfills: ["AC-9.1-1"]
+      - taskId: "9.1-T3"
+        type: "Frontend"
+        description: "重構：修改專案切換與流程圖渲染的邏輯，使其完全依賴前端快取，移除不必要的後端呼叫。"
+        fulfills: ["AC-9.1-2", "AC-9.1-3"]
+      - taskId: "9.1-T4"
         type: "QA"
-        description: "測試：執行單元與整合測試，確保初始化框架的邏輯正確性與整合相容性。"
-        fulfills: ["AC-8.1-1", "AC-8.1-2"]
-      - taskId: "8.1-T4"
+        description: "測試：執行整合測試，驗證後端 API 回傳的數據結構正確，且前端能成功初始化快取。"
+        fulfills: ["AC-9.1-1"]
+      - taskId: "9.1-T5"
         type: "QA"
-        description: "測試：執行端對端壓力測試，使用慢速網路模擬驗證競態條件問題已完全解決。"
-        fulfills: ["AC-8.1-3"]
+        description: "測試：執行端對端測試，驗證 UI 互動（切換專案、渲染圖表）的響應時間低於 100ms。"
+        fulfills: ["AC-9.1-2", "AC-9.1-3"]
 
-  - storyId: "8.2"
-    storyTitle: "作為一名 QA 工程師，我希望能完成第三次迭代中所有待定的（PENDING）測試，並將其納入自動化測試流程，以便我們能對核心功能的穩定性有信心，並提升未來迴歸測試的效率。" #
-    technicalBrief: "此故事的目標是建立自動化測試的安全網，引入 `QUnit for GAS` 等框架，為第三次迭代的核心後端函式建立結構化測試，達成 NFR8 的 90% 測試覆蓋率要求。" #
+  - storyId: "10.1"
+    storyTitle: "作為一名系統維護者，我希望能執行一個一次性的遷移腳本，將所有儲存在 Google Sheets `raw_content` 欄位中的產物內容，安全地遷移至指定的 GitHub Repository，以便完成數據儲存的架構分離。"
+    technicalBrief: "開發一個一次性的 GAS 腳本 `migrateContentToGitHub`，讀取 `Artifacts` 表，將 `raw_content` 推送到 GitHub，並將新的 URL 和 commit hash 寫回對應欄位。"
     technicalContext:
-      riskLevel: "P1 (高)" #
-      relatedNFR:
-        - id: "NFR8"
-          description: "核心功能（地圖載入、切換專案）的端對端測試覆蓋率應達到 90% 以上。" #
+      riskLevel: "P1 (High)"
+      relatedNFR: []
       architecture:
-        - component: "自動化測試框架 (Automated Testing Framework)" #
-          strategy: "引入社群成熟的 Google Apps Script 測試框架 (如 Gas-Simple-Scaffold 或 QUnit for GAS)，為第三次迭代交付的核心後端函式建立可重複執行的測試案例。測試將在一個專用的 Google Sheet 中運行，並輸出結構化的測試報告。" #
-          performanceConsiderations: "測試執行會消耗 Apps Script 的每日配額，但僅在開發與部署階段執行，對線上使用者無影響。" #
-          securityConsiderations: "測試案例不應包含任何生產環境的敏感金鑰或數據。所有測試都應在獨立的測試用 Google Sheet 上運行。" #
-      relatedFunctions: #
-        - "getFilesByRoleId"
-        - "parseIterationReport"
-        - "saveIdea"
-        - "switchProject"
-      affectedDataModels: #
-        - "Projects"
-        - "Artifacts"
-        - "Ideas"
+        - component: "Data Migration Script"
+          strategy: "開發一個獨立、可手動觸發的 GAS 函式，具備冪等性，確保重複執行不會造成數據損壞。"
+      relatedFunctions: ["migrateContentToGitHub()"]
+      affectedDataModels: ["Artifacts"]
     acceptanceCriteria:
-      - id: "AC-8.2-1"
-        description: "針對第三次迭代交付的核心後端函式，都已有對應的自動化測試案例。" #
-      - id: "AC-8.2-2"
-        description: "自動化測試腳本可以被手動觸發，並在控制台或日誌中輸出清晰的測試報告。" #
+      - { id: "AC-10.1-1", description: "一個名為 `migrateContentToGitHub` 的後端函式被建立。" }
+      - { id: "AC-10.1-2", description: "手動執行此函式後，`Artifacts` 表中所有原先有 `raw_content` 的行，其 `github_file_url` 和 `github_commit_hash` 欄位都被成功填充。" }
+      - { id: "AC-10.1-3", description: "隨機抽樣檢查，確認 Sheets 中的 URL 能連結到 GitHub 上對應的檔案，且內容完全一致。" }
     requiredTests:
-      - type: "Unit Test"
-        description: "涵蓋 `parseIterationReport` 函式的 YAML 解析 logique，驗證其是否能正確提取關鍵欄位。" #
       - type: "Integration Test"
-        description: "涵蓋 `getFilesByRoleId` 函式的資料庫查詢邏輯，包含正常與空結果兩種情境。" #
-      - type: "Integration Test"
-        description: "涵蓋 `saveIdea` 函式的資料庫寫入邏輯，驗證資料的正確寫入與回傳。" #
-      - type: "Integration Test"
-        description: "涵蓋 `switchProject` 函式的資料庫互動正確性。" #
+        description: "在測試環境中完整運行遷移腳本，驗證其正確性與冪等性。"
     tasks:
-      - taskId: "8.2-T1"
+      - taskId: "10.1-T1"
         type: "Backend"
-        description: "研究與準備：選擇並搭建 Google Apps Script 的自動化測試框架 (如 QUnit for GAS)，並建立專用的測試用 Google Sheet。"
-        fulfills: ["AC-8.2-2"]
-      - taskId: "8.2-T2"
+        description: "開發：撰寫 `migrateContentToGitHub` 函式，包含讀取 Sheets、呼叫 GitHub API 建立檔案、寫回 URL 與 commit hash 的邏輯。"
+        fulfills: ["AC-10.1-1", "AC-10.1-2"]
+      - taskId: "10.1-T2"
         type: "Backend"
-        description: "開發：為 `parseIterationReport` 和 `saveIdea` 函式撰寫單元/整合測試案例。"
-        fulfills: ["AC-8.2-1"]
-      - taskId: "8.2-T3"
-        type: "Backend"
-        description: "開發：為 `getFilesByRoleId` 和 `switchProject` 函式撰寫整合測試案例。"
-        fulfills: ["AC-8.2-1"]
-      - taskId: "8.2-T4"
+        description: "準備：設定 GitHub PAT 並安全地儲存在 PropertiesService 中，供遷移腳本使用。"
+        fulfills: ["AC-10.1-1"]
+      - taskId: "10.1-T3"
         type: "QA"
-        description: "測試：執行所有開發完成的自動化測試腳本，並產出第一份結構化的測試報告，確認腳本可被手動觸發且報告清晰。"
-        fulfills: ["AC-8.2-2"]
+        description: "測試：在測試用的 Google Sheet 上完整執行遷移腳本，並驗證數據遷移的準確性與腳本的冪等性。"
+        fulfills: ["AC-10.1-2", "AC-10.1-3"]
+
+  - storyId: "10.2"
+    storyTitle: "作為一名使用者，當我點擊流程圖中的一個節點時，我希望能從 GitHub 無縫地載入並看到該產物的最新內容，以便我能查閱詳細資訊。"
+    technicalBrief: "重構讀取產物內容的流程。開發 `getArtifactContent(artifactId)` API，使其從 Sheets 獲取 GitHub URL，再透過 GitHub API 取得文件內容。"
+    technicalContext:
+      riskLevel: "P1 (High)"
+      relatedNFR: []
+      architecture:
+        - component: "getArtifactContent(artifactId)"
+          strategy: "根據 artifactId，從 Google Sheets 獲取 GitHub URL，再透過 GitHub API 獲取文件內容返回給前端。"
+          securityConsiderations: "對 GitHub API 的請求必須使用安全的認證方式（PAT），且 PAT 應儲存在 PropertiesService 中。"
+      relatedFunctions: ["getArtifactContent(artifactId)"]
+      affectedDataModels: ["Artifacts"]
+    acceptanceCriteria:
+      - { id: "AC-10.2-1", description: "當使用者點擊一個節點時，前端會呼叫 `getArtifactContent(artifactId)` API。" }
+      - { id: "AC-10.2-2", description: "文件內容被成功返回並顯示在前端的內容區域。" }
+      - { id: "AC-10.2-3", description: "如果 GitHub 檔案不存在或無法存取，前端會顯示一個清晰的錯誤訊息。" }
+    requiredTests:
+      - type: "Integration Test"
+        description: "測試 `getArtifactContent` 的端到端流程。"
+      - type: "Integration Test"
+        description: "測試錯誤處理，例如當 GitHub 檔案不存在或認證失敗時，函式應返回清晰的錯誤訊息。"
+    tasks:
+      - taskId: "10.2-T1"
+        type: "Backend"
+        description: "開發：實作後端 `getArtifactContent` 函式，完成 Sheets 查詢 -> GitHub API 呼叫 -> 返回內容的完整流程。"
+        fulfills: ["AC-10.2-2"]
+      - taskId: "10.2-T2"
+        type: "Backend"
+        description: "開發：在 `getArtifactContent` 中加入完整的錯誤處理機制，處理 GitHub 檔案不存在或 API 認證失敗等情況。"
+        fulfills: ["AC-10.2-3"]
+      - taskId: "10.2-T3"
+        type: "Frontend"
+        description: "重構：修改節點點擊事件，使其呼叫新的 `getArtifactContent` API 並將返回內容渲染到畫面，同時處理錯誤訊息的顯示。"
+        fulfills: ["AC-10.2-1", "AC-10.2-3"]
+      - taskId: "10.2-T4"
+        type: "QA"
+        description: "測試：執行整合測試，驗證正常路徑與所有已知的錯誤處理路徑。"
+        fulfills: ["AC-10.2-2", "AC-10.2-3"]
+
+  - storyId: "10.3"
+    storyTitle: "作為一名使用者，當我上傳或更新一個產物時，我希望能將文件內容安全地儲存到 GitHub，並在 Google Sheets 中更新其索引，以便完成一次完整的產物版本迭代。"
+    technicalBrief: "開發具備事務性的 `createOrUpdateArtifact` API。此 API 必須先成功將內容 commit 至 GitHub，然後才能將元數據寫回 Google Sheets。"
+    technicalContext:
+      riskLevel: "P0 (Critical)"
+      relatedNFR:
+        - id: "NFR10"
+          description: "系統必須確保 Google Sheets 中的索引與 GitHub 中的內容之間 100% 的數據一致性。"
+      architecture:
+        - component: "createOrUpdateArtifact(artifactData, content)"
+          strategy: "具備事務性的寫入操作。先將內容 commit 至 GitHub，若成功，再將元數據（包含 commit hash 和 file URL）寫回 Google Sheets。"
+          performanceConsiderations: "寫入操作的延遲主要來自 GitHub API。應在前端實施『樂觀更新 (Optimistic Update)』以改善使用者體驗。"
+      relatedFunctions: ["createOrUpdateArtifact(metadata, content)"]
+      affectedDataModels: ["Artifacts"]
+    acceptanceCriteria:
+      - { id: "AC-10.3-1", description: "當使用者儲存產物時，前端會呼叫 `createOrUpdateArtifact(metadata, content)` API。" }
+      - { id: "AC-10.3-2", description: "後端成功將 `content` commit 到 GitHub，並將元數據與新的 `commit_hash` 更新到 Google Sheets。" }
+      - { id: "AC-10.3-3", description: "如果 GitHub 操作失敗，Google Sheets 不應有任何變更。如果 Sheets 操作失敗，後端必須記錄一筆待修復日誌。" }
+    requiredTests:
+      - type: "Integration Test"
+        description: "驗證完整的寫入流程，確保 GitHub commit 成功後，Google Sheets 的元數據也被正確更新。"
+      - type: "Integration Test"
+        description: "測試事務性保障：若 GitHub 操作失敗，驗證 Google Sheets 的數據沒有被修改。"
+      - type: "Integration Test"
+        description: "測試事務性保障：若 Sheets 操作失敗，驗證系統有留下可追溯的錯誤日誌。"
+    tasks:
+      - taskId: "10.3-T1"
+        type: "Backend"
+        description: "開發：實作後端 `createOrUpdateArtifact` 函式，嚴格遵循『先寫 GitHub，成功後再寫 Sheets』的事務性邏輯。"
+        fulfills: ["AC-10.3-2", "AC-10.3-3"]
+      - taskId: "10.3-T2"
+        type: "Backend"
+        description: "開發：為 `createOrUpdateArtifact` 函式添加詳細的錯誤日誌記錄機制，特別是針對 Sheets 寫入失敗的情況。"
+        fulfills: ["AC-10.3-3"]
+      - taskId: "10.3-T3"
+        type: "Frontend"
+        description: "重構：修改產物儲存功能，使其呼叫新的 `createOrUpdateArtifact` API。"
+        fulfills: ["AC-10.3-1"]
+      - taskId: "10.3-T4"
+        type: "QA"
+        description: "測試：執行整合測試，重點測試事務性保障。模擬 GitHub API 失敗，並驗證 Sheets 數據未被更改。"
+        fulfills: ["AC-10.3-2", "AC-10.3-3"]
