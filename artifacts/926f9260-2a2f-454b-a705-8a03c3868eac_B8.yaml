@@ -1,185 +1,70 @@
 # ===================================================================
 # Iteration Closing Report (ICR) / As-Built Blueprint
 # ===================================================================
-# 本文件是 MVP 藍圖在第三次迭代後的演化版本。
+# 本文件是 MVP 藍圖在第四次迭代後的演化版本。
 # 它反映了系統的「竣工」狀態，而不僅僅是計畫。
 # 它是下一次迭代規劃的唯一事實來源。
 # ===================================================================
 
-iterationId: 3
-sprintId: 3
+iterationId: 4
+sprintId: 4
 sourceBlueprintVersion: "v3"
-finalStatus: "COMPLETED_WITH_DEVIATIONS"
+finalStatus: "COMPLETED_WITH_DEVIATIONS" [cite: sprint_summary_report.yaml]
 
 # --- 專案元資訊 (Project Metadata) ---
 projectInfo:
   projectName: "GEMS - 視覺化敏捷流程管理工具"
-  executiveSummary: "一個基於 Google Apps Script 和 Google Sheets 的輕量級網頁應用，旨在將定義好的敏捷開發流程視覺化。它透過互動式流程圖來管理各階段產出的 YAML 文件，提供團隊一個清晰、集中且可追溯的專案儀表板。"
-  sprintGoal: "新增跨專案導航的下拉式選單。同時，將目前的靜態流程圖重構為一個可互動、可摺疊的全景儀表板，並開發 YAML 內容摘要與『創意牆』筆記功能，全面提升核心導航與資訊獲取效率。"
+  sprintGoal: "償還第三次迭代中發現的關鍵技術債。核心任務是建立一個全局的初始化框架以根除競態條件問題，並完成所有待定的自動化測試，以確保平台在擴展新功能前具備穩固的品質基礎。" [cite: sprint_summary_report.yaml]
 
 # --- 1. 執行日誌與成果 (Execution Log & Outcomes) ---
 executionLog:
-  - epic: "Epic 5: 互動式全景儀表板升級"
+  - epic: "Epic 8: 平台穩定性與品質保證鞏固"
     stories:
-      - story: "5.1"
-        storyTitle: "作為一個 Vibe CEO，我希望將流程圖重構成三個可摺疊的主要階段，以便我可以專注於當前的專案階段，而不會被整個複雜的流程分散注意力。"
-        finalStatus: "Done"
-        implementationDetails:
-          - taskId: "5.1-T1"
+      - story: "8.1"
+        storyTitle: "作為一名開發者，我希望能建立一個全局的初始化框架，並將現有的 initializeApp 函式標準化，以便能從根本上解決 Google API 的競態條件問題，確保應用的穩定性。" [cite: sprint_summary_report.yaml]
+        finalStatus: "Done" [cite: sprint_summary_report.yaml]
+        implementationDetails: # From sprint_summary_report.yaml
+          - taskId: "8.1-T1"
             logType: "PROGRESS"
-            description: "開發：設計並實作了支持三階段層次關係的 SVG 圖表數據結構與渲染邏輯。"
-            developerNotes: ""
-            changedFiles: ["index.html"]
-          - taskId: "5.1-T2"
+            description: "開發：在 Index.html 中設計並實作了名為 G_API 的全局非同步初始化模組。" [cite: sprint_summary_report.yaml]
+          - taskId: "8.1-T2"
             logType: "PROGRESS"
-            description: "開發：為階段標題添加點擊事件，並實作展開/摺疊的 JavaScript 邏輯。"
-            developerNotes: ""
-            changedFiles: ["index.html", "styles.css"]
-        acceptanceCriteriaOutcome:
-          - id: "AC-5.1-1"
+            description: "重構：全面盤點並修改 Index.html 中所有 google.script.run 的呼叫點。" [cite: sprint_summary_report.yaml]
+        acceptanceCriteriaOutcome: # From sprint_summary_report.yaml
+          - id: "AC-8.1-1"
             qaResult: "PASS"
-            qaFinding: "QA 報告確認，sprint_fillback.yaml 驗證筆記『初始載入時，流程圖正確顯示為三個摺疊起來的階段標題』，證明此 AC 已達成 [cite: qa_consolidated_report.yaml, sprint_fillback.yaml]。"
-          - id: "AC-5.1-2"
+            qaFinding: "QA 報告確認，sprint_fillback.yaml 驗證筆記『Vibe CEO 已確認，前端程式碼中已建立 G_API 模組來管理 API 狀態』，證明此 AC 已達成。" [cite: sprint_summary_report.yaml]
+          - id: "AC-8.1-2"
             qaResult: "PASS"
-            qaFinding: "QA 報告確認，sprint_fillback.yaml 驗證筆記『點擊任一階段標題，都能平滑地展開該階段的詳細流程』，證明此 AC 已達成 [cite: qa_consolidated_report.yaml, sprint_fillback.yaml]。"
-          - id: "AC-5.1-3"
+            qaFinding: "QA 報告確認，sprint_fillback.yaml 驗證筆記『Vibe CEO 已確認，所有 google.script.run 呼叫都已重構為透過 G_API.run 執行』，證明此 AC 已達成。" [cite: sprint_summary_report.yaml]
+          - id: "AC-8.1-3"
             qaResult: "PASS"
-            qaFinding: "QA 報告確認，sprint_fillback.yaml 驗證筆記『再次點擊已展開的階段標題，可以將其成功摺疊』，證明此 AC 已達成 [cite: qa_consolidated_report.yaml, sprint_fillback.yaml]。"
+            qaFinding: "QA 報告確認，sprint_fillback.yaml 驗證筆記『Vibe CEO 已在開發者工具中模擬慢速網路 (Slow 3G) 進行壓力測試，確認應用程式在長時間延遲後依然能成功載入並正常運作』，證明此 AC 已達成。" [cite: sprint_summary_report.yaml]
         deviationAnalysis:
           reason: "None"
-          changeProposalId: null
-          details: "所有任務均按計畫完成，無未完成工作。"
-      - story: "5.2"
-        storyTitle: "作為一個團隊成員，我希望在點擊一個『角色』節點後，能看到他所負責產出的所有『文件』，以便我能快速地找到並查閱相關的專案產物。"
-        finalStatus: "Done"
-        implementationDetails:
-          - taskId: "5.2-T1"
+          details: "所有任務均按計畫完成。" [cite: sprint_summary_report.yaml]
+
+      - story: "8.2"
+        storyTitle: "作為一名 QA 工程師，我希望能完成第三次迭代中所有待定的（PENDING）測試，並將其納入自動化測試流程，以便我們能對核心功能的穩定性有信心，並提升未來迴歸測試的效率。" [cite: sprint_summary_report.yaml]
+        finalStatus: "Done" [cite: sprint_summary_report.yaml]
+        implementationDetails: # From sprint_summary_report.yaml
+          - taskId: "8.2-T1"
             logType: "PROGRESS"
-            description: "開發：在 `Code.gs` 中建立後端函式 `getFilesByRoleId`，使其能從 `Artifacts` 工作表動態查詢文件是否存在。"
-            developerNotes: ""
-            changedFiles: ["Code.gs"]
-          - taskId: "5.2-T2"
-            logType: "PROGRESS"
-            description: "開發：整合前端點擊事件，使其能呼叫既有的 `getArtifactContent` 函式來載入並顯示文件內容。"
-            developerNotes: ""
-            changedFiles: ["index.html"]
-        acceptanceCriteriaOutcome:
-          - id: "AC-5.2-1"
+            description: "研究與準備：選擇並引入了 QUnit for GAS 測試框架，並將其整合至新的 TestRunner.gs 腳本檔案中。" [cite: sprint_summary_report.yaml]
+          - taskId: "8.2-T2, 8.2-T3, 8.2-T4"
+            logType: "IMPLICIT_ITERATION"
+            description: "開發與除錯：為 4 個核心函式撰寫了 5 個測試案例，並與 Vibe CEO 多次協作，反覆除錯並強化了 Mock 框架的穩定性，最終成功讓所有測試通過。" [cite: sprint_summary_report.yaml]
+        acceptanceCriteriaOutcome: # From sprint_summary_report.yaml
+          - id: "AC-8.2-1"
             qaResult: "PASS"
-            qaFinding: "QA 報告確認，sprint_fillback.yaml 驗證筆記『點擊任一『角色』節點，下方會彈出對應的『文件』列表』，證明此 AC 已達成 [cite: qa_consolidated_report.yaml, sprint_fillback.yaml]。"
-          - id: "AC-5.2-2"
+            qaFinding: "QA 報告確認，sprint_fillback.yaml 驗證筆記『Vibe CEO 已確認，涵蓋 4 個核心函式的 5 個自動化測試案例已全部建立』，證明此 AC 已達成。" [cite: sprint_summary_report.yaml]
+          - id: "AC-8.2-2"
             qaResult: "PASS"
-            qaFinding: "QA 報告確認，sprint_fillback.yaml 驗證筆記『點擊已存在的文件，其內容成功載入到右側內容顯示區』，證明此 AC 已達成 [cite: qa_consolidated_report.yaml, sprint_fillback.yaml]。"
-          - id: "AC-5.2-3"
-            qaResult: "PASS"
-            qaFinding: "QA 報告確認，sprint_fillback.yaml 驗證筆記『不存在的文件以灰色顯示，點擊後觸發上傳流程，UI 反饋明確』，證明此 AC 已達成 [cite: qa_consolidated_report.yaml, sprint_fillback.yaml]。"
+            qaFinding: "QA 報告確認，sprint_fillback.yaml 驗證筆記『Vibe CEO 已手動觸發 runAllTests 函式，並確認所有 5 個測試都成功通過，且在執行紀錄中輸出了清晰的 ✅ PASS 報告』，證明此 AC 已達成。" [cite: sprint_summary_report.yaml]
         deviationAnalysis:
-          reason: "None"
-          changeProposalId: null
-          details: "所有任務均按計畫完成，無未完成工作。"
-  - epic: "Epic 6: 使用者體驗與資訊可及性優化"
-    stories:
-      - story: "6.1"
-        storyTitle: "作為一個 Vibe CEO，當我檢視一份『迭代學習報告』的 YAML 產物時，我希望能直接在頂部看到一個摘要，包含最終狀態和下次迭代候選項目數量，以便我能快速掌握最重要的結論。"
-        finalStatus: "Done"
-        implementationDetails:
-          - taskId: "6.1-T1"
-            logType: "PROGRESS"
-            description: "開發：實作 `parseIterationReport` 函式，用於解析 ICR 報告。"
-            developerNotes: ""
-            changedFiles: ["Code.gs"]
-          - taskId: "6.1-T2"
-            logType: "PROGRESS"
-            description: "開發：設計並實作摘要框的 UI 元件。"
-            developerNotes: ""
-            changedFiles: ["index.html"]
-        acceptanceCriteriaOutcome:
-          - id: "AC-6.1-1"
-            qaResult: "PASS"
-            qaFinding: "QA 報告確認，sprint_fillback.yaml 驗證筆記『後端 `parseIterationReport` 函式被正確觸發』，證明此 AC 已達成 [cite: qa_consolidated_report.yaml, sprint_fillback.yaml]。"
-          - id: "AC-6.1-2"
-            qaResult: "PASS"
-            qaFinding: "QA 報告確認，sprint_fillback.yaml 驗證筆記『前端出現了可互動、可摺疊的摘要框』，證明此 AC 已達成 [cite: qa_consolidated_report.yaml, sprint_fillback.yaml]。"
-          - id: "AC-6.1-3"
-            qaResult: "PASS"
-            qaFinding: "QA 報告確認，sprint_fillback.yaml 驗證筆記『摘要框中包含 `finalStatus` 和 `nextIterationCandidates` 的總數量』，證明此 AC 已達成 [cite: qa_consolidated_report.yaml, sprint_fillback.yaml]。"
-        deviationAnalysis:
-          reason: "None"
-          changeProposalId: null
-          details: "所有任務均按計畫完成，無未完成工作。"
-      - story: "6.2"
-        storyTitle: "作為一個團隊成員，我希望在畫面上隨時有一個『創意牆』的入口，讓我可以隨時記錄下突發奇想或回饋，而不需要切換頁面或打斷當前思路。"
-        finalStatus: "Done"
-        implementationDetails:
-          - taskId: "6.2-T2"
-            logType: "PROGRESS"
-            description: "開發：實作創意牆前端 UI 與點擊事件邏輯，包含浮動按鈕和輸入框。"
-            developerNotes: ""
-            changedFiles: ["index.html"]
-          - taskId: "6.2-T3"
-            logType: "PROGRESS"
-            description: "開發：實作後端函式，將輸入內容寫入 Google Sheets 的 `Ideas` 工作表。"
-            developerNotes: ""
-            changedFiles: ["Code.gs"]
-        acceptanceCriteriaOutcome:
-          - id: "AC-6.2-1"
-            qaResult: "PASS"
-            qaFinding: "QA 報告確認，sprint_fillback.yaml 驗證筆記『畫面右下角始終顯示浮動按鈕』，證明此 AC 已達成 [cite: qa_consolidated_report.yaml, sprint_fillback.yaml]。"
-          - id: "AC-6.2-2"
-            qaResult: "PASS"
-            qaFinding: "QA 報告確認，sprint_fillback.yaml 驗證筆記『點擊按鈕可正常彈出輸入介面』，證明此 AC 已達成 [cite: qa_consolidated_report.yaml, sprint_fillback.yaml]。"
-          - id: "AC-6.2-3"
-            qaResult: "PASS"
-            qaFinding: "QA 報告確認，sprint_fillback.yaml 驗證筆記『採用『樂觀更新』模式，內容立即顯示在 UI 上，並在背景成功寫入 Google Sheets』，證明此 AC 已達成 [cite: qa_consolidated_report.yaml, sprint_fillback.yaml]。"
-        deviationAnalysis:
-          reason: "None"
-          changeProposalId: null
-          details: "所有任務均按計畫完成，無未完成工作。"
-  - epic: "Epic 7: 核心 UI 導航增強"
-    stories:
-      - story: "7.1"
-        storyTitle: "作為一個使用者，我希望在 UI 頂部有一個下拉式選單，裡面列出所有專案的名稱，讓我可以直接選擇並切換到不同的專案儀表板。"
-        finalStatus: "Done"
-        implementationDetails:
-          - taskId: "7.1-T1"
-            logType: "PROGRESS"
-            description: "開發：實作後端函式，從 Google Sheets 讀取專案列表。"
-            developerNotes: ""
-            changedFiles: ["Code.gs"]
-          - taskId: "7.1-T2"
-            logType: "PROGRESS"
-            description: "開發：實作前端下拉式選單 UI 和事件監聽邏輯。"
-            developerNotes: ""
-            changedFiles: ["index.html"]
-          - taskId: "7.1-T4"
-            logType: "PROGRESS"
-            description: "開發：實作儀表板刷新邏輯，確保切換專案後內容同步更新。"
-            developerNotes: ""
-            changedFiles: ["index.html"]
-          - taskId: "7.1-T3"
-            logType: "PROGRESS"
-            description: "開發：實作了後端與前端的雙層快取機制，優化了專案列表的載入效能。"
-            developerNotes: ""
-            changedFiles: ["Code.gs"]
-          - taskId: null
-            logType: "TACTICAL_FIX"
-            description: "修正：解決了因計時問題 (Race Condition) 導致的 `google is not defined` 錯誤，透過引入 `initializeApp` 函式確保在執行前 API 已準備就緒，提升了應用的穩定性。"
-            developerNotes: ""
-            changedFiles: ["index.html", "Code.gs"]
-        acceptanceCriteriaOutcome:
-          - id: "AC-7.1-1"
-            qaResult: "PASS"
-            qaFinding: "QA 報告確認，sprint_fillback.yaml 驗證筆記『應用程式載入時，成功從後端讀取並顯示專案清單』，證明此 AC 已達成 [cite: qa_consolidated_report.yaml, sprint_fillback.yaml]。"
-          - id: "AC-7.1-2"
-            qaResult: "PASS"
-            qaFinding: "QA 報告確認，sprint_fillback.yaml 驗證筆記『UI 頂部 Header 區域已正確顯示下拉式選單元件』，證明此 AC 已達成 [cite: qa_consolidated_report.yaml, sprint_fillback.yaml]。"
-          - id: "AC-7.1-3"
-            qaResult: "PASS"
-            qaFinding: "QA 報告確認，sprint_fillback.yaml 驗證筆記『從下拉選單中選擇不同專案後，主儀表板內容會同步刷新，顯示所選專案的資料』，證明此 AC 已達成 [cite: qa_consolidated_report.yaml, sprint_fillback.yaml]。"
-        deviationAnalysis:
-          reason: "技術問題修正 (Technical issue fix)"
-          changeProposalId: "SCP-GEMS-005"
-          details: "修復了因 Google API 未初始化導致的競態條件問題，引入 `initializeApp` 函式，確保功能穩定性，變更已獲批准。"
+          reason: "隱性迭代 (Implicit Iteration)"
+          changeProposalId: "SCP-GEMS-006"
+          details: "在開發自動化測試的過程中，團隊抓住機會強化了 Mock 框架的穩定性與擴展性，此有價值的投入已獲批准。" [cite: sprint_summary_report.yaml]
 
 # --- 2. 竣工版架構與技術棧 (As-Built Architecture & Tech Stack) ---
 asBuiltArchitecture:
@@ -191,153 +76,94 @@ asBuiltArchitecture:
           C -- SpreadsheetApp --> D[Google Sheets (Database)];
           C -- UrlFetchApp --> E[GitHub API];
           C -- PropertiesService --> F[Script Properties];
-  techStack:
+  techStack: # Based on sprint_summary_report.yaml
     - category: "Backend Runtime"
       technology: "Google Apps Script"
-      reason: "[未變更] 核心後端運行環境，依計畫使用。"
-    - category: "Backend Configuration"
-      technology: "PropertiesService"
-      reason: "[未變更] 由 Iteration 2 Story 3.1 引入，用於安全管理 GitHub API Token。"
+      reason: "[未變更] 核心後端運行環境。"
     - category: "Database"
       technology: "Google Sheets"
-      reason: "[未變更] 核心資料儲存方案，支援所有資料模型。"
+      reason: "[未變更] 核心資料儲存方案。"
     - category: "Frontend"
       technology: "HTML Service (HTML/CSS/JS)"
-      reason: "[未變更] 前端渲染技術，支援動態 UI 功能。"
+      reason: "[未變更] 前端渲染技術。"
     - category: "Diagram Rendering"
       technology: "Inline SVG (Componentized)"
-      reason: "[未變更] 由 Iteration 2 Story 4.1 完成重構，現為可複用元件。"
+      reason: "[未變更] 輕量且可自定義的流程圖渲染方案。"
     - category: "External Services"
       technology: "GitHub API"
-      reason: "[未變更] 由 Iteration 2 Story 3.1 & 3.2 整合，用於版本控制與同步。"
-    - category: "YAML Parsing"
+      reason: "[未變更] 用於版本控制與產物同步。"
+    - category: "Key Libraries"
       technology: "js-yaml"
-      reason: "[新增] 由 Story 6.1 引入，用於解析 Iteration_Closing_Report.yaml 以生成摘要，滿足 FR13 需求。"
-      sourceLog: "mvp_blueprint_v3-3.yaml (FR13)"
-    - category: "UI Components"
+      reason: "[未變更] 用於在後端高效解析 YAML 文件內容。"
+    - category: "UI Frameworks"
       technology: "Bootstrap (CSS/JS)"
-      reason: "[新增] 由 Stories 6.2, 7.1 引入，用於實現浮動按鈕與下拉式選單，提升 UI 一致性與互動性。"
-      sourceLog: "mvp_blueprint_v3-3.yaml (FR14, FR15)"
-  dataModels:
-    - modelName: "Projects"
-      description: "儲存專案的清單與基本資訊。"
+      reason: "[未變更] 用於快速建構標準化的 UI 元件。"
+    - category: "Testing Frameworks"
+      technology: "QUnit for GAS"
+      reason: "[已確立] 由 Story 8.2 正式引入並完成整合，用於後端單元與整合測試。" [cite: sprint_summary_report.yaml]
+  dataModels: # [修正] 完整呈現 sprint_summary_report.yaml 中的資料庫竣工狀態
+    - sheetName: "Projects"
       fields:
-        project_id: "string (Primary Key)"
-        project_name: "string"
-        status: "string"
-        created_at: "Timestamp"
-      notes: "[新增] 由 Story 7.1 引入，支援跨專案導航功能。"
-    - modelName: "Artifacts"
-      description: "儲存所有上傳的產物（YAML 文件）及其元數據，支援版本控制與 GitHub 同步。"
+        - { name: "project_id", type: "string (Primary Key)" }
+        - { name: "project_name", type: "string" }
+        - { name: "status", type: "string" }
+        - { name: "created_at", type: "Timestamp" }
+    - sheetName: "Artifacts"
       fields:
-        artifact_id: "string (Primary Key)"
-        project_id: "string (Foreign Key)"
-        node_id: "string"
-        artifact_type: "string"
-        related_artifact_id: "string"
-        status: "string"
-        version: "string"
-        key_info_1: "string"
-        key_info_2: "string"
-        raw_content: "string (Full YAML text)"
-        github_file_url: "string"
-        github_commit_hash: "string"
-        created_at: "Timestamp"
-      notes: "[未變更] 由 Iteration 2 Story 3.2 擴充，新增版本控制欄位。"
-    - modelName: "Ideas"
-      description: "儲存來自『創意牆』的文字筆記，支援快速記錄與查詢。"
+        - { name: "artifact_id", type: "string (Primary Key)" }
+        - { name: "project_id", type: "string (Foreign Key)" }
+        - { name: "node_id", type: "string" }
+        - { name: "artifact_type", type: "string" }
+        - { name: "related_artifact_id", type: "string" }
+        - { name: "status", type: "string" }
+        - { name: "version", type: "string" }
+        - { name: "key_info_1", type: "string" }
+        - { name: "key_info_2", type: "string" }
+        - { name: "raw_content", type: "string (Full YAML text)" }
+        - { name: "github_file_url", type: "string" }
+        - { name: "github_commit_hash", type: "string" }
+        - { name: "created_at", type: "Timestamp" }
+    - sheetName: "Ideas"
       fields:
-        idea_id: "string (Primary Key)"
-        project_id: "string (Foreign Key)"
-        content: "string"
-        created_at: "Timestamp"
-        created_by: "string"
-        status: "string"
-        tags: "string (Comma-separated)"
-      notes: "[新增] 由 Story 6.2 引入，支援創意牆筆記功能。"
+        - { name: "idea_id", type: "string (Primary Key)" }
+        - { name: "project_id", type: "string (Foreign Key)" }
+        - { name: "content", type: "string" }
+        - { name: "created_at", type: "Timestamp" }
+        - { name: "created_by", type: "string" }
+        - { name: "status", type: "string" }
+        - { name: "tags", type: "string (Comma-separated)" }
   architecturalNotes:
-    - noteId: "AN-UI-001"
+    - noteId: "AN-SYS-003"
       type: "IMPROVEMENT_IMPLEMENTED"
-      description: "在 Story 6.2 中引入了『樂觀更新』模式，用於創意牆筆記的 UI 處理，提升了使用者體驗的即時性。"
-      relatedChangeProposal: null
-    - noteId: "AN-BE-001"
+      description: "Story 8.1 成功將『API 初始化』這個橫切關注點，抽象成一個獨立的 G_API 模組來管理。這完美體現了單一職責原則，根除了競態條件，顯著提升了程式碼的健壯性與可維護性。" [cite: sprint_summary_report.yaml]
+      relatedStory: "8.1"
+    - noteId: "AN-QA-001"
       type: "IMPROVEMENT_IMPLEMENTED"
-      description: "在 Story 7.1 中實作了後端與前端的雙層快取機制，優化了專案列表的載入效能。"
-      relatedChangeProposal: null
-    - noteId: "AN-SYS-001"
-      type: "LIMITATION_IDENTIFIED"
-      description: "在 Story 7.1 中發現了 Google Apps Script 的初始化競態條件問題，可能影響未來 API 整合的穩定性。"
-      relatedChangeProposal: "SCP-GEMS-005"
-    - noteId: "AN-UI-002"
+      description: "Story 8.2 中建立的自動化測試框架與 Mock 框架，為『Serverless 優先』架構的長期穩定性提供了關鍵保障，是品質保證流程的一大步。" [cite: sprint_summary_report.yaml]
+      relatedStory: "8.2"
+    - noteId: "AN-QA-002"
       type: "EMERGENT_COMPONENT"
-      description: "在 Story 7.1 的 TACTICAL_FIX 中引入了 `initializeApp` 函式，作為一個可複用的初始化模式，用於確保 API 準備就緒。"
-      relatedChangeProposal: "SCP-GEMS-005"
-    - noteId: "AN-UI-003"
-      type: "IMPROVEMENT_IMPLEMENTED"
-      description: "在 Story 5.2 中，為不存在的文件提供了灰色顯示與上傳觸發提示，提升了 UI 的互動性。"
-      relatedChangeProposal: null
-    - noteId: "AN-BE-002"
-      type: "IMPROVEMENT_IMPLEMENTED"
-      description: "在 Story 6.1 中引入了 js-yaml 函式庫，實現了 Iteration_Closing_Report.yaml 的高效解析，支援摘要生成，提升資訊可及性。"
-      relatedChangeProposal: null
-    - noteId: "AN-SYS-002"
-      type: "LIMITATION_IDENTIFIED"
-      description: "部分測試（效能、整合、端對端）標記為 PENDING，需人工驗證，可能影響功能的全面穩定性。"
-      relatedChangeProposal: null
+      description: "在 Story 8.2 的隱性迭代中，開發團隊強化並鞏固了一個可複用的 Mock 框架，未來可以輕易地為新的後端函式模擬測試情境，加速測試案例的撰寫。" [cite: sprint_summary_report.yaml]
+      relatedChangeProposal: "SCP-GEMS-006"
 
 # --- 3. 下次迭代候選項目 (Next Iteration Candidates) ---
 nextIterationCandidates:
-  - candidateId: "NIC-S3-001"
-    type: "TECHNICAL_DEBT_REPAYMENT"
-    title: "解決 Google Apps Script 初始化競態條件問題"
-    description: "研究並實作一個全局的初始化框架，防止未來類似的 Race Condition 問題發生，涵蓋所有 Google API 的呼叫點。"
-    priority: "HIGH"
-    sourceLog: "architecturalNotes AN-SYS-001; Story 7.1 Deviation Analysis (SCP-GEMS-005)"
-  - candidateId: "NIC-S3-002"
+  - candidateId: "NIC-S4-001"
     type: "NEW_FEATURE_DEVELOPMENT"
-    title: "優化 GitHub API 的錯誤處理與前端回饋機制"
-    description: "開發 GitHub API 整合的錯誤處理邏輯，包括重試機制與使用者友善的 UI 通知，以減緩網路延遲或穩定性問題。"
-    priority: "MEDIUM"
-    sourceLog: "mvp_blueprint_v3-3.yaml outOfScope: '優化 GitHub API 的錯誤處理與前端回饋機制。'; constraintsAndRisks risks: '風險二: 外部 API (GitHub) 的穩定性與網路延遲，可能影響產物同步的成功率與使用者體驗。'; Iteration 2 Story 3.1, 3.2 executionLog"
-  - candidateId: "NIC-S3-003"
-    type: "QUALITY_IMPROVEMENT"
-    title: "標準化樂觀更新模式為可複用 UI 元件"
-    description: "將 Story 6.2 中的『樂觀更新』邏輯封裝成一個可複用的 JavaScript 元件，並應用於其他互動功能，如文件上傳與摘要載入。"
-    priority: "MEDIUM"
-    sourceLog: "architecturalNotes AN-UI-001; Story 6.2 acceptanceCriteriaOutcome AC-6.2-3"
-  - candidateId: "NIC-S3-004"
-    type: "QUALITY_IMPROVEMENT"
-    title: "將 `initializeApp` 函式標準化為系統初始化模式"
-    description: "將 Story 7.1 中的 `initializeApp` 函式擴展為一個核心初始化模組，確保所有前端腳本在執行前檢查 API 就緒，並進行一次全面的程式碼審核。"
+    title: "實施前端快取與效能優化策略"
+    description: "根據 Product_Roadmap.md 中的規劃，著手進行架構升級。在應用程式啟動時預載入所有必要的專案與產物元數據至前端，實現零延遲的 UI 互動。"
     priority: "HIGH"
-    sourceLog: "architecturalNotes AN-UI-002; Story 7.1 implementationDetails TACTICAL_FIX"
-  - candidateId: "NIC-S3-005"
-    type: "TECHNICAL_DEBT_REPAYMENT"
-    title: "解決 Google Sheets 作為資料庫的效能瓶頸"
-    description: "評估並測試 Google Sheets 在高負載下的讀寫效能，探索替代方案如分表或快取層，以應對專案與產物數量增長。"
-    priority: "MEDIUM"
-    sourceLog: "constraintsAndRisks risks: '風險一: 隨著專案與產物數量增長，Google Sheets 作為資料庫可能遇到讀寫效能瓶頸。'; architecturalNotes (implicit from dataModels usage in Stories 5.2, 6.2, 7.1)"
-  - candidateId: "NIC-S3-006"
+    sourceLog: "Product_Roadmap.md (史詩 1)"
+  - candidateId: "NIC-S4-002"
     type: "NEW_FEATURE_DEVELOPMENT"
-    title: "創意牆筆記的進階管理功能"
-    description: "新增編輯、刪除與標籤分類功能給創意牆筆記，提升筆記管理的可用性。"
-    priority: "MEDIUM"
-    sourceLog: "mvp_blueprint_v3-3.yaml outOfScope: '創意牆筆記的進階管理功能（如編輯、刪除、標籤分類）。'; Story 6.2 executionLog"
-  - candidateId: "NIC-S3-007"
-    type: "QUALITY_IMPROVEMENT"
-    title: "進行全面 UI/UX 審核與 SVG 佈局優化"
-    description: "針對全景儀表板與文件列表進行 UI/UX 審核，包括標準化 SVG 節點尺寸、間距與顏色方案，並整合 Story 5.2 中的灰色提示邏輯。"
-    priority: "MEDIUM"
-    sourceLog: "architecturalNotes AN-UI-003; mvp_blueprint_v3-3.yaml outOfScope: '將 SVG 佈局優化（如節點尺寸、間距）進行標準化參數配置。'; Story 5.1 and 5.2 executionLog"
-  - candidateId: "NIC-S3-008"
-    type: "QUALITY_IMPROVEMENT"
-    title: "優化 YAML 解析效能與錯誤處理"
-    description: "針對 js-yaml 函式庫進行效能測試，新增錯誤處理邏輯以應對格式錯誤的 YAML 文件，並確保解析過程不阻塞 UI。"
-    priority: "MEDIUM"
-    sourceLog: "architecturalNotes AN-BE-002; Story 6.1 implementationDetails; mvp_blueprint_v3-3.yaml (FR13)"
-  - candidateId: "NIC-S3-009"
-    type: "QUALITY_IMPROVEMENT"
-    title: "完成 PENDING 測試並建立自動化測試流程"
-    description: "針對 Stories 5.1, 5.2, 6.1, 6.2, 7.1 中標記為 PENDING 的效能、整合和端對端測試，完成人工驗證並建立自動化測試腳本，以提升未來迭代的測試效率。"
+    title: "重構版本控制架構，引入 GitHub 作為內容資料庫"
+    description: "根據 Product_Roadmap.md 中的規劃，將內容儲存與元數據管理分離。重構後端邏輯，讓 Google Sheets 作為索引，GitHub 作為所有 YAML 文件的實際內容儲存體。"
     priority: "HIGH"
-    sourceLog: "sprint_summary_report.yaml summaryAnalysis: '部分必要測試仍為 PENDING，需人工驗證'; architecturalNotes AN-SYS-002"
+    sourceLog: "Product_Roadmap.md (史詩 2)"
+  - candidateId: "NIC-S4-003"
+    type: "QUALITY_IMPROVEMENT"
+    title: "將 Mock 框架標準化並擴展測試覆蓋範圍"
+    description: "將 Story 8.2 中誕生的 Mock 框架正式文件化，並利用它來擴充先前迭代（Iteration 2, 3）中核心函式的自動化測試覆蓋率。"
+    priority: "MEDIUM"
+    sourceLog: "architecturalNotes AN-QA-002; sprint_summary_report.yaml (Story 8.2 Implicit Iteration)"
+
