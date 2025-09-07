@@ -1,0 +1,85 @@
+storyId: "1.1"
+storyTitle: "作為一個專案經理，我想要建立一個新專案並為它命名，以便開始追蹤這個專案的所有產出物。"
+acceptanceCriteriaStatus:
+  - id: "AC-1.1-1"
+    status: "Fulfilled"
+    verificationNote: "Vibe CEO 已確認，前端介面成功渲染『新增專案』按鈕。"
+  - id: "AC-1.1-2"
+    status: "Fulfilled"
+    verificationNote: "Vibe CEO 已手動測試完成，並提供 Google Sheet 的成功紀錄為證。"
+developerLog:
+- logType: "PROGRESS"
+  taskId: "1.1-T1"
+  description: "開發：根據 mvp_blueprint_v3.yaml 規範，使用 HTML Service 和 Google Apps Script 撰寫前後端腳本。"
+  status: "Done"
+---
+storyId: "1.2"
+storyTitle: "作為一個團隊成員，我想要在打開應用時，能看到一個基於 Mermaid.txt 的標準開發流程圖，以便我能了解整個開發流程的各個階段。"
+acceptanceCriteriaStatus:
+  - id: "AC-1.2-1"
+    status: "Fulfilled"
+    verificationNote: "Vibe CEO 已手動測試確認，網頁左側區域成功渲染出流程圖。"
+  - id: "AC-1.2-2"
+    status: "Fulfilled"
+    verificationNote: "Vibe CEO 已手動測試確認，點擊圖中任一節點後，右側內容面板會顯示對應的節點資訊。"
+developerLog:
+  - logType: "TACTICAL_FIX"
+    taskId: "1.2-T1"
+    description: "修正：Mermaid.js 函式庫在 Google Apps Script 環境中渲染失敗或無法綁定點擊事件。"
+    status: "Done"
+    developerNotes: "根據 Vibe CEO 提供的可行方案，已將流程圖的實現方式從依賴 Mermaid.js 外部函式庫改為使用更穩定、無依賴的原生 SVG 標籤。"
+---
+storyId: "2.1"
+storyTitle: "作為一個開發者，我想要點擊流程圖中的一個文件節點（例如 B5: sprint fillback），以便上傳我完成的 YAML 工作日誌。"
+acceptanceCriteriaStatus:
+  - id: "AC-2.1-1"
+    status: "Fulfilled"
+    verificationNote: "Vibe CEO 已手動測試確認，點擊任一文件節點後，會彈出標準的檔案選擇對話框。"
+  - id: "AC-2.1-2"
+    status: "Fulfilled"
+    verificationNote: "Vibe CEO 已手動測試確認，選擇 YAML 檔案後，介面顯示成功訊息，代表檔案內容已成功傳送到後端並被接收。"
+developerLog:
+  - logType: "PROGRESS"
+    taskId: "2.1-T1"
+    description: "開發：完成點擊節點上傳 YAML 文件的流程。"
+    status: "Done"
+---
+storyId: "2.2"
+storyTitle: "作為一個系統，當收到上傳的 YAML 文件後，我需要將其內容及關聯資訊儲存到 Google Sheet，以便永久保存紀錄。"
+acceptanceCriteriaStatus:
+  - id: "AC-2.2-1"
+    status: "Fulfilled"
+    verificationNote: "Vibe CEO 已手動測試確認，後端函式成功接收檔案內容。"
+  - id: "AC-2.2-2"
+    status: "Fulfilled"
+    verificationNote: "Vibe CEO 已手動測試確認，上傳檔案後，`Artifacts` 工作表中已成功新增對應的完整紀錄。"
+developerLog:
+  - logType: "PROGRESS"
+    taskId: "2.2-T1"
+    description: "開發：完成後端儲存 YAML 產物至 Google Sheets 的邏輯。"
+    status: "Done"
+    developerNotes: "修改了後端的 `uploadFileContent` 函式，將接收到的檔案內容、節點 ID、以及預設的第一個專案 ID，寫入 `Artifacts` 工作表中。"
+---
+storyId: "2.3"
+storyTitle: "作為一個品管師，我想要點擊一個已經上傳過 QA 報告的節點（B6），以便在畫面右側看到報告的完整內容以進行審核。"
+acceptanceCriteriaStatus:
+  - id: "AC-2.3-1"
+    status: "Fulfilled"
+    verificationNote: "Vibe CEO 已手動測試確認，點擊節點時，系統會正確檢查 `Artifacts` 表中是否存在紀錄。"
+  - id: "AC-2.3-2"
+    status: "Fulfilled"
+    verificationNote: "Vibe CEO 已手動測試確認，如果存在紀錄，畫面右側的內容區會顯示該紀錄的 `raw_content`。"
+developerLog:
+  - logType: "PROGRESS"
+    taskId: "2.3-T1"
+    description: "開發：完成點擊節點後，讀取並顯示已上傳的 YAML 內容。"
+    status: "Done"
+    developerNotes: "後端：新增 `getArtifactContent` 函式，用於查詢指定節點的最新產出物。前端：修改 `handleNodeClick` 函式，現在會先呼叫後端查詢，如果找到內容則直接顯示，找不到才觸發上傳流程。"
+  - logType: "IMPLICIT_ITERATION"
+    taskId: "2.3-T1"
+    description: "優化：為主要內容區增加滾動條，解決內容超出畫面問題。"
+    status: "Done"
+    developerNotes: "在 Vibe CEO 的建議下，為了解決當流程圖或產出物內容高度超過螢幕時的可用性問題，已透過修改 CSS 屬性為 `.main-layout` 增加 `overflow-y: auto`，確保在內容溢出時能提供垂直滾動功能。"
+    changedFiles:
+      - 'Index.html'
+
