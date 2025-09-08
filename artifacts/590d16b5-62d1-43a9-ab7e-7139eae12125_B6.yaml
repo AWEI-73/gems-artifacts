@@ -183,3 +183,4 @@ storyReports:
     summaryAndDefects:
       summary: "所有驗收標準均已通過驗證。開發日誌清晰，功能交付完整。必要測試尚待人工審核。"
       defects: []
+      # test sync
