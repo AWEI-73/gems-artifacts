@@ -1,0 +1,297 @@
+projectId: "GEMS - 視覺化敏捷流程管理工具"
+sprintId: 6
+sprintGoal: "將 GEMS 平台從『可用』提升至『可靠』。核心任務是實作增量快取、API 速率控制、程式碼模組化、強化安全性，並建立全自動化的數據同步機制。"
+version: "3.0"
+status: "Approved"
+
+# ===================================================================
+# Foundational Architecture & Principles
+# 來源：mvp_blueprint_v3.yaml (無損轉譯)
+# ===================================================================
+foundationalArchitecture:
+  highLevelArchitecture:
+    architecturalStyle: "具備前端狀態的 Serverless Web App with GitHub Backend"
+    architecturalPrinciples:
+      - principle: "狀態前移 (Stateful Frontend, Stateless Backend)"
+        description: "[既有] 將 UI 狀態移至前端管理，後端專注於無狀態的數據 CRUD。"
+      - principle: "索引與內容分離 (Index-Content Separation)"
+        description: "[既有] 嚴格區分元數據索引（Google Sheets）與文件內容（GitHub）。"
+      - principle: "模組化與關注點分離 (Modularity and Separation of Concerns)"
+        description: "[本次迭代引入] 將單體式程式碼依職責拆分為獨立的模組（如數據層、服務層、UI層），降低耦合度。"
+    systemDiagram: |
+      graph TD;
+          A[使用者瀏覽器-含快取層] --> B[HTML Service (Stateful UI)];
+          B -- google.script.run (Minimal) --> C{Google Apps Script (Stateless Server)};
+          C -- SpreadsheetApp (Index Only) --> D[Google Sheets (Metadata Index)];
+          C -- UrlFetchApp (Content CRUD) --> E[GitHub API v3 (Content Store)];
+          C -- PropertiesService --> F[Script Properties (Credentials)];
+          B -- Local Cache --> G[appDataCache (In-memory State)];
+          
+          subgraph "Iteration 6 Enhancements"
+              H[GitHub Webhook] -- HTTPS POST --> I{GAS Web App Endpoint};
+              I -- Updates Index --> D;
+          end
+
+  techStack:
+    - category: "Frontend State Management"
+      technology: "In-memory JavaScript Object (appDataCache)"
+      reason: "[已確立] 成功實作並驗證，UI 響應時間達到 <100ms 目標。"
+    - category: "Backend Runtime"
+      technology: "Google Apps Script (V8 Runtime)"
+      reason: "[未變更] 核心後端運行環境。本次迭代將對其程式碼結構進行重構。"
+    - category: "Database"
+      technology: "Google Sheets"
+      reason: "[職責已變更] 成功轉型為純元數據索引。"
+    - category: "Content Store"
+      technology: "GitHub Repository (via REST API v3)"
+      reason: "[已確立] 成功整合，所有 YAML 內容已遷移，版本控制功能完備。"
+    - category: "Key Libraries"
+      technology: "js-yaml"
+      reason: "[未變更] 持續用於 YAML 解析。"
+    - category: "Backend Integration"
+      technology: "Google Apps Script Web App"
+      reason: "[本次迭代引入] 建立一個 Web App 端點以接收來自 GitHub 的 Webhook 事件。"
+    - category: "Performance Features"
+      technology: "GitHub API Response Cache"
+      reason: "[既有] 第五次迭代引入，本次將進行標準化。"
+
+  dataModels:
+    - sheetName: "Projects"
+      status: "UNCHANGED"
+      fields:
+        - { name: "project_id", type: "string (Primary Key)" }
+        - { name: "project_name", type: "string" }
+        - { name: "status", type: "string" }
+        - { name: "created_at", type: "Timestamp" }
+    - sheetName: "Artifacts"
+      status: "STABLE"
+      fields:
+        - { name: "artifact_id", type: "string (Primary Key)" }
+        - { name: "project_id", type: "string (Foreign Key)" }
+        - { name: "node_id", type: "string" }
+        - { name: "artifact_type", type: "string" }
+        - { name: "version", type: "string" }
+        - { name: "key_info_1", type: "string" }
+        - { name: "key_info_2", type: "string" }
+        - { name: "github_file_url", type: "string (ACTIVE)" }
+        - { name: "github_commit_hash", type: "string (ACTIVE)" }
+        - { name: "created_at", type: "Timestamp" }
+    - sheetName: "Ideas"
+      status: "UNCHANGED"
+      fields:
+        - { name: "idea_id", type: "string (Primary Key)" }
+        - { name: "project_id", type: "string (Foreign Key)" }
+        - { name: "content", type: "string" }
+        - { name: "created_at", type: "Timestamp" }
+        - { name: "created_by", type: "string" }
+        - { name: "status", type: "string" }
+        - { name: "tags", type: "string (Comma-separated)" }
+
+# ===================================================================
+# Stories & Tasks for Sprint 6
+# ===================================================================
+stories:
+  - storyId: "11.1"
+    storyTitle: "作為一名使用者，當我在應用程式中進行了數據變更（如上傳產物）後，我希望前端快取能只更新變動的部分，而不是重新載入所有專案數據，以保持應用的響應速度。"
+    technicalBrief: "改造寫入 API，使其返回輕量級變更數據，並開發前端 `updateCacheIncrementally` 函式，實現快取的精確更新。"
+    technicalContext:
+      riskLevel: "P1 (High)"
+      relatedNFR: []
+      architecture:
+        - component: "updateCacheIncrementally(changeData)"
+          strategy: "前端函式，接收來自後端的變更數據，精確更新 `appDataCache` 中的特定部分，而非全量刷新。"
+      relatedFunctions: ["updateCacheIncrementally()", "createOrUpdateArtifact()"]
+    acceptanceCriteria:
+      - { id: "AC-11.1-1", description: "後端 `createOrUpdateArtifact` 等寫入函式成功後，會返回一個包含變更內容的輕量級數據物件。" }
+      - { id: "AC-11.1-2", description: "前端接收到此數據後，會呼叫一個 `updateCacheIncrementally` 函式來更新 `appDataCache`。" }
+      - { id: "AC-11.1-3", description: "在開發者工具的 Network 面板中，確認在更新操作後沒有觸發 `initializeAppWithCache` 的全量載入請求。" }
+    requiredTests:
+      - type: "Unit Test"
+        description: "驗證 `updateCacheIncrementally` 函式在接收不同類型的變更數據（新增、更新）時，能正確地修改 `appDataCache` 的狀態。"
+      - type: "Integration Test"
+        description: "驗證 `createOrUpdateArtifact` API 成功後，回傳的數據能被前端正確接收，並觸發快取更新，且 UI 正確反映此變更。"
+    tasks:
+      - taskId: "11.1-T1"
+        type: "Backend"
+        description: "重構：修改 `createOrUpdateArtifact` 函式，使其在操作成功後，返回一個包含該產物最新元數據的輕量級物件。"
+        fulfills: ["AC-11.1-1"]
+      - taskId: "11.1-T2"
+        type: "Frontend"
+        description: "開發：實作 `updateCacheIncrementally(changeData)` 函式，能夠接收後端回傳的物件，並精確地更新或新增 `appDataCache` 中的對應條目。"
+        fulfills: ["AC-11.1-2"]
+      - taskId: "11.1-T3"
+        type: "Frontend"
+        description: "整合：修改前端的儲存邏輯，在 `google.script.run` 的成功回呼中，調用 `updateCacheIncrementally` 函式。"
+        fulfills: ["AC-11.1-2"]
+      - taskId: "11.1-T4"
+        type: "QA"
+        description: "測試：執行端對端測試，手動儲存一個產物，驗證 `appDataCache` 被正確更新，且沒有觸發全量載入 API。"
+        fulfills: ["AC-11.1-3"]
+
+  - storyId: "11.2"
+    storyTitle: "作為一名系統維護者，我希望能有一個內建的 API 請求管理機制，來智慧地調節對 GitHub API 的呼叫，以確保 GEMS 不會因為觸發速率限制而導致服務中斷。"
+    technicalBrief: "建立一個統一的 `GitHubService.fetch` 函式，內建請求佇列、指數退避重試及可配置的快取，以集中管理所有對 GitHub API 的請求。"
+    technicalContext:
+      riskLevel: "P1 (High)"
+      relatedNFR: []
+      architecture:
+        - component: "GitHubService.fetch()"
+          strategy: "所有對 GitHub API 的呼叫都透過一個統一的服務函式（如 `GitHubService.fetch`）進行。該函式內建了請求佇列與指數退避重試邏輯，並整合了第五次迭代建立的響應快取機制，並使其可配置。"
+      relatedFunctions: ["GitHubService.fetch()"]
+    acceptanceCriteria:
+      - { id: "AC-11.2-1", description: "所有對 GitHub API 的呼叫都透過一個統一的服務函式（如 `GitHubService.fetch`）進行。" }
+      - { id: "AC-11.2-2", description: "該服務函式內建了請求佇列與指數退避重試邏輯。" }
+      - { id: "AC-11.2-3", description: "該服務函式整合了第五次迭代建立的響應快取機制，並使其可配置。" }
+    requiredTests:
+      - type: "Unit Test"
+        description: "針對 `GitHubService.fetch` 中的指數退避邏輯撰寫測試，模擬 API 回傳 429 或 5xx 錯誤，驗證重試機制被正確觸發。"
+      - type: "Integration Test"
+        description: "建立一個 Mock API 端點，用來測試 `GitHubService.fetch` 的快取功能，驗證相同的請求在快取有效期內不會重複觸發實際呼叫。"
+    tasks:
+      - taskId: "11.2-T1"
+        type: "Backend"
+        description: "開發：建立 `GitHubService.fetch` 函式，作為所有 GitHub API 請求的統一出口。"
+        fulfills: ["AC-11.2-1"]
+      - taskId: "11.2-T2"
+        type: "Backend"
+        description: "開發：在 `GitHubService.fetch` 中實作指數退避重試邏輯，以應對 API 暫時性錯誤或速率限制。"
+        fulfills: ["AC-11.2-2"]
+      - taskId: "11.2-T3"
+        type: "Backend"
+        description: "重構：將現有的 GitHub API 呼叫（如讀取、寫入內容）全部重構為使用 `GitHubService.fetch`。"
+        fulfills: ["AC-11.2-1"]
+      - taskId: "11.2-T4"
+        type: "Backend"
+        description: "整合：將第五次迭代建立的快取機制（CacheService）整合進 `GitHubService.fetch`，並提供可配置選項。"
+        fulfills: ["AC-11.2-3"]
+      - taskId: "11.2-T5"
+        type: "QA"
+        description: "測試：撰寫單元測試，模擬 API 失敗情境，驗證指數退避邏輯被正確觸發。"
+        fulfills: ["AC-11.2-2"]
+
+  - storyId: "12.1"
+    storyTitle: "作為一名開發者，我希望能將龐大的 `code.gs` 與 `Index.html` 檔案依職責進行拆分，以便我能更容易地理解、修改和擴展程式碼，而不會影響到不相關的部分。"
+    technicalBrief: "執行程式碼庫的結構化重構，將後端 `code.gs` 拆分為多個職責單一的模組，並將前端 `Index.html` 中的 CSS 與 JS 分離。"
+    technicalContext:
+      riskLevel: "P1 (High)"
+      relatedNFR:
+        - id: "NFR12"
+          description: "重構後的程式碼必須保持或提升現有的測試覆蓋率。"
+      architecture:
+        - component: "Codebase Refactoring"
+          strategy: "此為一系列重構任務的代稱，非單一函式。目標是將 `code.gs` 拆分為 `DataModel.gs`, `GitHubService.gs`, `SheetService.gs` 等模組；將 `Index.html` 拆分為 `Stylesheet.html` 和 `ClientScript.html`。"
+      relatedFunctions: ["Codebase Refactoring"]
+    acceptanceCriteria:
+      - { id: "AC-12.1-1", description: "`code.gs` 被拆分為至少三個獨立的 `.gs` 檔案（如 `DataModel.gs`, `GitHubService.gs`, `Main.gs`）。" }
+      - { id: "AC-12.1-2", description: "`Index.html` 中的 CSS 和 JavaScript 被分離到獨立的 `Stylesheet.html` 和 `ClientScript.html` 檔案中，並透過 `HtmlService` 的 include 機制引入。" }
+      - { id: "AC-12.1-3", description: "執行完整的迴歸測試，證明重構未改變任何現有功能。" }
+    requiredTests:
+      - type: "Regression Test"
+        description: "建立一份涵蓋所有核心使用者路徑的測試案例清單（Checklist），在重構前後執行，確保功能行為 100% 一致。路徑應包含：應用初始化、切換專案、讀取產物、更新產物、建立新產物。"
+    tasks:
+      - taskId: "12.1-T1"
+        type: "Backend"
+        description: "重構：建立 `GitHubService.gs`，並將所有與 GitHub API 互動的相關函式從 `code.gs` 遷移至此。"
+        fulfills: ["AC-12.1-1"]
+      - taskId: "12.1-T2"
+        type: "Backend"
+        description: "重構：建立 `SheetService.gs`，並將所有與 Google Sheets 互動的相關函式從 `code.gs` 遷移至此。"
+        fulfills: ["AC-12.1-1"]
+      - taskId: "12.1-T3"
+        type: "Frontend"
+        description: "重構：建立 `Stylesheet.html` 與 `ClientScript.html`，並將 `Index.html` 中的 `<style>` 和 `<script>` 內容分別遷移。"
+        fulfills: ["AC-12.1-2"]
+      - taskId: "12.1-T4"
+        type: "Frontend"
+        description: "重構：修改後端 `doGet` 函式，使用 `HtmlService.createHtmlOutputFromFile('Index.html').evaluate()` 的方式，並在 `Index.html` 中使用 `<?!= include('...'); ?>` 語法引入 CSS 與 JS 檔案。"
+        fulfills: ["AC-12.1-2"]
+      - taskId: "12.1-T5"
+        type: "QA"
+        description: "測試：執行全面的迴歸測試，確保所有功能（載入、讀取、儲存、切換專案）在重構後行為完全一致。"
+        fulfills: ["AC-12.1-3"]
+
+  - storyId: "12.2"
+    storyTitle: "作為一名系統維護者，我需要一個安全的機制來設定和管理 GitHub PAT，確保它永遠不會被硬編碼在程式碼中，並且所有對它的存取都是受控和記錄的。"
+    technicalBrief: "建立一個只能由管理員手動執行的後端函式 `setGitHubToken`，將 Token 存入 PropertiesService，並統一透過 `GitHubService.getAuthToken` 進行讀取。"
+    technicalContext:
+      riskLevel: "P0 (Critical)"
+      relatedNFR:
+        - id: "NFR11"
+          description: "所有對 GitHub PAT 的存取都必須透過安全的、受控的服務函式進行。"
+      architecture:
+        - component: "setGitHubToken() / GitHubService.getAuthToken()"
+          strategy: "建立一個名為 `setGitHubToken` 的後端函式，只能由管理員手動執行，用於將 Token 安全地儲存到 `PropertiesService`。程式碼中所有需要 Token 的地方，都必須透過一個 `GitHubService.getAuthToken()` 的函式來獲取。"
+      relatedFunctions: ["setGitHubToken()", "GitHubService.getAuthToken()"]
+    acceptanceCriteria:
+      - { id: "AC-12.2-1", description: "建立一個名為 `setGitHubToken` 的後端函式，只能由管理員手動執行，用於將 Token 安全地儲存到 `PropertiesService`。" }
+      - { id: "AC-12.2-2", description: "程式碼中所有需要 Token 的地方，都必須透過一個 `GitHubService.getAuthToken()` 的函式來獲取。" }
+      - { id: "AC-12.2-3", description: "在 GitHub Repository 中執行程式碼掃描，確認沒有任何 PAT 的硬編碼實例。" }
+    requiredTests:
+      - type: "Integration Test"
+        description: "驗證 `setGitHubToken` -> `getAuthToken` -> `GitHubService.fetch` 的完整流程。手動設定 Token 後，確認 API 呼叫能成功使用該 Token 進行認證。"
+      - type: "Security Audit"
+        description: "執行靜態程式碼分析 (Static Code Analysis)，掃描整個程式碼庫，確認除了 `PropertiesService` 的調用外，沒有任何地方以明文形式儲存或硬編碼 PAT。"
+    tasks:
+      - taskId: "12.2-T1"
+        type: "Backend"
+        description: "開發：建立 `setGitHubToken(token)` 函式，使用 `PropertiesService.getUserProperties().setProperty()` 儲存 Token。"
+        fulfills: ["AC-12.2-1"]
+      - taskId: "12.2-T2"
+        type: "Backend"
+        description: "開發：在 `GitHubService.gs` 中建立 `getAuthToken()` 函式，使用 `PropertiesService.getUserProperties().getProperty()` 讀取 Token。"
+        fulfills: ["AC-12.2-2"]
+      - taskId: "12.2-T3"
+        type: "Backend"
+        description: "重構：將 `GitHubService.fetch` 及其他需要認證的函式，改為調用 `getAuthToken()` 來獲取憑證。"
+        fulfills: ["AC-12.2-2"]
+      - taskId: "12.2-T4"
+        type: "QA"
+        description: "測試：手動執行 `setGitHubToken`，然後觸發一個需要認證的 API 呼叫，驗證流程能成功運作。"
+        fulfills: ["AC-12.2-1", "AC-12.2-2"]
+      - taskId: "12.2-T5"
+        type: "DevOps"
+        description: "稽核：在程式碼庫中執行靜態掃描，搜尋 `ghp_` 等 PAT 特徵字串，確保無硬編碼洩漏。"
+        fulfills: ["AC-12.2-3"]
+
+  - storyId: "13.1"
+    storyTitle: "作為一名使用者，當我或我的同事直接在 GitHub 上修改了一個產物文件時，我希望能即時地在 GEMS 應用中看到這個變更，而不需要手動同步，以確保數據的永遠一致。"
+    technicalBrief: "部署一個 Google Apps Script Web App 端點，設定 GitHub Webhook 以監聽 push 事件，並開發後端邏輯以解析 payload，即時更新 Google Sheets 中的元數據索引。"
+    technicalContext:
+      riskLevel: "P0 (Critical)"
+      relatedNFR: []
+      architecture:
+        - component: "doPost(e)"
+          strategy: "後端 Web App 入口函式。負責接收、驗證 GitHub Webhook 的 POST 請求，並根據事件類型（如 push）調用相應的處理邏輯。"
+      relatedFunctions: ["doPost(e)"]
+      affectedDataModels: ["Artifacts"]
+    acceptanceCriteria:
+      - { id: "AC-13.1-1", description: "一個 Google Apps Script Web App 被成功部署，並生成一個唯一的 URL。" }
+      - { id: "AC-13.1-2", description: "在 GitHub Repository 中成功設定一個 Webhook，指向該 URL，並訂閱 `push` 事件。" }
+      - { id: "AC-13.1-3", description: "當在 GitHub 上 commit 一個文件變更後，對應產物在 Google Sheets 中的 `github_commit_hash` 和 `version` 等元數據在 5 秒內被自動更新。" }
+    requiredTests:
+      - type: "Integration Test"
+        description: "使用工具（如 Postman）模擬合法的 GitHub Webhook `push` 事件請求，發送到已部署的 Web App URL，驗證 Google Sheets 中的對應產物元數據被正確更新。"
+      - type: "Negative Test"
+        description: "發送一個格式錯誤或缺少關鍵欄位的模擬 Webhook payload，驗證 `doPost(e)` 函式能優雅地處理錯誤（例如，記錄錯誤日誌但不會導致服務崩潰）。"
+    tasks:
+      - taskId: "13.1-T1"
+        type: "Backend"
+        description: "開發：建立 `doPost(e)` 函式，並將其部署為一個可公開存取的 Web App，獲取其 URL。"
+        fulfills: ["AC-13.1-1"]
+      - taskId: "13.1-T2"
+        type: "Backend"
+        description: "開發：在 `doPost(e)` 中實作邏輯，以解析 GitHub `push` 事件的 payload，提取出被修改的檔案路徑與最新的 commit hash。"
+        fulfills: ["AC-13.1-3"]
+      - taskId: "13.1-T3"
+        type: "Backend"
+        description: "開發：編寫 `SheetService.updateArtifactByPath` 函式，使其能夠根據檔案路徑找到對應的產物，並更新其 `github_commit_hash` 等元數據。"
+        fulfills: ["AC-13.1-3"]
+      - taskId: "13.1-T4"
+        type: "DevOps"
+        description: "設定：在 GitHub Repository 的 Settings > Webhooks 中，新增一個 Webhook，將 Payload URL 設為已部署的 Web App URL。"
+        fulfills: ["AC-13.1-2"]
+      - taskId: "13.1-T5"
+        type: "QA"
+        description: "測試：執行端對端測試。直接在 GitHub 網頁介面修改一個 YAML 檔案並 commit，然後檢查 Google Sheets 中的對應行是否在 5 秒內被更新。"
+        fulfills: ["AC-13.1-3"]
+
