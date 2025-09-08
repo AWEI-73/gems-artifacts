@@ -1,38 +1,49 @@
-proposalId: "SCP-GEMS-007"
-sprintId: 5
-status: "Proposed"
+proposalId: "SCP-GEMS-003"
+sprintId: 2
+status: "PendingApproval" # 狀態等待 Vibe CEO 批准
+
 changeType: "TACTICAL_FIX"
-
 trigger:
-  sourceFile: "sprint_fillback.yaml"
-  storyId: "10.3"
-  taskId: "10.3-T1, 10.3-T3"
-  description: "在 Story 10.3 的開發與測試過程中，為了解決後端上傳邏輯缺陷與前端 UI 迴歸性問題，執行了兩次關鍵的戰術性修正。"
-
+  type: "Technical Issue"
+  reportedBy: "Vibe CEO / Dev Team"
+  date: "2025-09-06"
+  description: "在任務 3.1-T2 的實作過程中，發現前端呼叫的後端函式 `uploadFileContent` 不存在，導致檔案上傳流程完全失敗。" #
 impactAnalysis:
-  summary: "這兩次修正是成功交付 Story 10.3 的必要措施。它們解決了阻礙功能驗收的技術障礙，對衝刺目標的達成產生了直接的正面貢獻，且未對時程造成負面影響。"
-  impacts:
-    - area: "功能穩定性"
-      description: "後端修復確保了核心的上傳功能具備健壯性；前端修復則解決了嚴重的 UI 迴歸問題，保障了使用者體驗。"
-    - area: "驗收標準"
-      description: "若無此修正，驗收標準 AC-10.3-2 與 AC-10.3-3 將無法通過。修正後，所有相關 AC 均已滿足。"
-    - area: "時程"
-      description: "無負面影響。修復是在原定的任務執行時間內完成的。"
-
+  sprintGoalImpact: "無。此為必要修正，確保了衝刺目標中『完成與 GitHub API 的核心整合』功能的正常運作。"
+  summary: "修正了因前後端函式簽名不匹配而導致的通訊失敗問題，恢復了檔案上傳至後端的核心功能。"
 changeScope:
-  - storyId: "10.3"
+  - storyId: "3.1"
     action: "NO_CHANGE"
     tasks:
-      - taskId: "10.3-T1"
+      - taskId: "3.1-T2"
         action: "MODIFY"
         updates:
-          description: "將原任務『實作後端 createOrUpdateArtifact 函式』，更新為『修復：與 Vibe CEO 協作重構 createOrUpdateArtifact 與 syncToGitHub 函式，穩定後端上傳邏輯』，以準確反映實際執行內容。"
-      - taskId: "10.3-T3"
-        action: "MODIFY"
-        updates:
-          description: "將原任務『重構產物儲存功能』，更新為『修復：重構前端 renderProcessDiagram 與 handleFileSelect 函式，解決 UI 狀態顯示與重複上傳的迴歸問題』，以準確反映實際執行內容。"
-
+          description: "開發：實作核心同步邏輯...並修正後端入口點函式 `uploadFileContent` 以匹配前端 `google.script.run` 的呼叫。" #
 proposedSolution:
-  summary: "正式批准並認可此次在 Story 10.3 執行過程中所做的兩次戰術性修正。"
-  actions:
-    - "在最終的衝刺總結報告 (Sprint Summary Report) 中，將這兩筆 `TACTICAL_FIX` 的日誌納入，以忠實記錄為達成目標所做的關鍵技術決策與執行細節。"
+  rationale: "此問題阻礙了 Story 3.1 的核心功能交付。將後端入口點函式名調整為 `uploadFileContent(fileContent, nodeId)`，是解決前後端通訊失敗最直接且必要的手段，確保了功能的完整性。" #
+
+---
+proposalId: "SCP-GEMS-004"
+sprintId: 2
+status: "PendingApproval" # 狀態等待 Vibe CEO 批准
+
+changeType: "IMPLICIT_ITERATION"
+trigger:
+  type: "Usability Improvement"
+  reportedBy: "Vibe CEO"
+  date: "2025-09-06"
+  description: "在任務 4.1-T3 的無迴歸測試期間，Vibe CEO 回饋流程圖節點尺寸過大，佈局不夠緊湊，影響了在有限空間內的可讀性。" #
+impactAnalysis:
+  sprintGoalImpact: "無直接影響，但提升了衝刺目標中『重構前端 SVG 渲染邏輯』的最終產出品質與使用者體驗。"
+  summary: "透過縮小節點尺寸與調整佈局，優化了 SVG 流程圖的視覺呈現，使其更加緊湊與易讀。"
+changeScope:
+  - storyId: "4.1"
+    action: "NO_CHANGE"
+    tasks:
+      - taskId: "opt-4.1-U1" # 新增一個優化任務 (Usability)
+        action: "ADD"
+        type: "Frontend"
+        description: "優化：將 SVG 節點寬度從 200px 調整為 180px，高度從 60px 調整為 50px，並重新計算座標以優化佈局。" #
+        dependencies: ["4.1-T2"]
+proposedSolution:
+  rationale: "這是一個低成本、高回報的使用者體驗優化。在不影響原定計畫的前提下，根據 CEO 的直接反饋解決了視覺佈局問題，顯著提升了產品的易用性與專業度。"
