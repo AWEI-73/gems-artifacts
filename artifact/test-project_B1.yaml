@@ -1,0 +1,6 @@
+
+projectId: "test-project"
+sprintId: 1
+sprintGoal: "測試衝刺目標"
+version: "1.0"
+status: "Testing"
