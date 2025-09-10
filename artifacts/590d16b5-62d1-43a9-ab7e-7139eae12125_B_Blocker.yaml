@@ -1,4 +1,4 @@
-projectInfo:23
+projectInfo:
   projectName: 智慧菜單規劃與意見調查系統
   executiveSummary: 一款整合 Google Sheets 作為後端、Google Apps Script 作為前端的菜單管理工具。它能將現有菜單匯入為結構化資料，並透過使用者意見調查來收集偏好，最終目標是結合 AI 分析與菜價爬蟲，提供智慧化的菜單建議。
   problemStatement: 餐廳或團體膳食管理者在規劃菜單時，缺乏有效的工具來收集使用者偏好，且難以系統化地管理菜色清單。手動整理菜單費時費力，也無法有效避免菜色重複或考量成本。
