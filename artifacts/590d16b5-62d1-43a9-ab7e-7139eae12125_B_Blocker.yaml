@@ -1,0 +1,85 @@
+storyId: "14.1"
+storyTitle: "作為一名專案經理，當我審核一份產物時，我希望能看到一個清晰的版本歷史列表，以便我能快速了解這份文件的所有變更紀錄。"
+acceptanceCriteriaStatus:
+  - id: "AC-14.1-1"
+    status: "Fulfilled"
+    verificationNote: "Vibe CEO 已確認，在產物檢視介面旁成功出現『版本歷史』按鈕。"
+  - id: "AC-14.1-2"
+    status: "Fulfilled"
+    verificationNote: "Vibe CEO 已確認，點擊後，UI 上成功以列表形式顯示了版本號、提交者與提交日期。"
+  - id: "AC-14.1-3"
+    status: "Fulfilled"
+    verificationNote: "Vibe CEO 已確認，版本歷史列表以降序（最新版本在上）正確排列。"
+testingLog:
+  - level: "開發者單元測試"
+    method: "已完成 `ClientScript.html` 中版本歷史 UI 的渲染與事件綁定邏輯的靜態檢查。"
+    result: "通過，邏輯符合預期。"
+  - level: "使用者驗收測試 (UAT)"
+    method: "由 Vibe CEO 於 2025/09/09 進行端對端手動操作驗證。"
+    result: "通過，Vibe CEO 已回報『是得沒問題』，所有功能符合驗收條件。"
+developerLog:
+  - logType: "TACTICAL_FIX"
+    taskId: "Pre-T1"
+    description: "建立『全域 API 介面層』，在 DataModel.gs 中新增全域函式，以解決 `google.script.run` 無法呼叫模組化服務的戰術性障礙。"
+    status: "Done"
+    changedFiles: 
+      - "DataModel.gs"
+      - "ClientScript.html"
+  - logType: "IMPLICIT_ITERATION"
+    taskId: "N/A"
+    description: "強化 `GitHubService.fetch` 函式，使其在未明確指定請求方法時，能自動預設為 'get'，修正了執行階段錯誤。"
+    status: "Done"
+    developerNotes: "提升了 `fetch` 函式的健壯性與容錯能力。"
+    changedFiles:
+      - "GitHubService.gs"
+  - logType: "PROGRESS"
+    taskId: "14.1-T1"
+    description: "[SheetService.gs] 開發：實作 `getVersionHistory(artifactId)` 函式。"
+    status: "Done"
+    changedFiles:
+      - "SheetService.gs"
+  - logType: "PROGRESS"
+    taskId: "14.1-T2, 14.1-T3"
+    description: "[ClientScript.html] 開發：實作『版本歷史』按鈕與版本列表 UI。"
+    status: "Done"
+    changedFiles:
+      - "ClientScript.html"
+  - logType: "IMPLICIT_ITERATION"
+    taskId: "N/A"
+    description: "根據 Vibe CEO 的提問，在日誌中補充說明版本歷史功能的兩項核心設計原則。"
+    status: "Done"
+    developerNotes: |
+      1. **版本號 (Commit Hash)**：UI 上顯示的非序列號碼 (如 ca9c540) 是 Git 的 Commit Hash，一個代表該次存檔的「數位指紋」，確保了每個版本紀錄的全球唯一性與可追溯性。
+      2. **效能策略 (On-Demand Loading)**：使用者每次點擊歷史版本時感受到的短暫停頓，是刻意採用的「按需載入」策略。系統只在使用者請求時才去讀取特定版本的完整內容，避免了一次性載入所有歷史版本可能造成的長時間等待與資源浪費，從而優化了應用的初始反應速度與整體體驗。
+    changedFiles: []
+---
+storyId: "14.2"
+storyTitle: "作為一名專案經理，在看到版本歷史列表後，我希望能點選其中任一版本，並立即檢視該版本的完整內容，以便我能對比不同階段的產出。"
+acceptanceCriteriaStatus:
+  - id: "AC-14.2-1"
+    status: "Fulfilled"
+    verificationNote: "Vibe CEO 已確認，版本歷史列表中的每個項目都是可點擊的。"
+  - id: "AC-14.2-2"
+    status: "Fulfilled"
+    verificationNote: "Vibe CEO 已確認，點擊一個歷史版本後，前端成功帶著 `commitHash` 呼叫後端函式。"
+  - id: "AC-14.2-3"
+    status: "Fulfilled"
+    verificationNote: "Vibe CEO 已確認，主要的內容顯示區域成功更新為所選歷史版本的內容，並出現了明確的視覺提示。"
+testingLog:
+  - level: "開發者單- level: \"使用者驗收測試 (UAT)\"測試"
+    method: "由 Vibe CEO 於 2025/09/09 進行端對端手動操作驗證。"
+    result: "通過，Vibe CEO 已回報『是得沒問題』，所有功能符合驗收條件。"
+developerLog:
+  - logType: "PROGRESS"
+    taskId: "14.2-T1"
+    description: "[GitHubService.gs] 開發：實作 `getArtifactContentByHash(filePath, commitHash)` 函式。"
+    status: "Done"
+    changedFiles:
+      - "GitHubService.gs"
+  - logType: "PROGRESS"
+    taskId: "14.2-T2, 14.2-T3"
+    description: "[ClientScript.html] 開發：為版本歷史列表添加點擊事件，並實作內容更新與視覺提示的 UI 邏輯。"
+    status: "Done"
+    changedFiles:
+      - "ClientScript.html"
+
