@@ -1,6 +1,6 @@
 proposalId: "SCP-GEMS-003"
 sprintId: 2
-status: "PendingApproval" # 狀態等待 Vibe CEO 批准
+status: "PendingApproval" # 狀態等待 Vibe CEO 批准-1
 
 changeType: "TACTICAL_FIX"
 trigger:
