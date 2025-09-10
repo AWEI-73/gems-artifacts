@@ -1,75 +1,132 @@
-storyId: "3.1"
-storyTitle: "作為一個開發者，我希望在我上傳產物後，系統能自動將該文件同步到指定的 GitHub Repo，以便讓文件與程式碼的版本保持一致。"
-acceptanceCriteriaStatus:
-  - id: "AC-3.1-1"
-    status: "Fulfilled"
-    verificationNote: "Vibe CEO 已手動測試確認，上傳檔案後，紀錄成功寫入 Google Sheet 並觸發 GitHub 同步。"
-  - id: "AC-3.1-2"
-    status: "Fulfilled"
-    verificationNote: "Vibe CEO 已確認 GitHub 配置成功儲存，腳本能安全讀取 Token 與 Repo 設定。"
-  - id: "AC-3.1-3"
-    status: "Fulfilled"
-    verificationNote: "Vibe CEO 已手動測試確認，上傳檔案後，指定的 GitHub Repo 中成功出現了內容相符的新 commit。"
-developerLog:
-  - logType: "PROGRESS"
-    taskId: "3.1-T1"
-    description: "開發：建立一個安全的配置管理機制 (使用 PropertiesService) 來儲存 GitHub Token 與 Repo 設定。"
-    status: "Done"
-  - logType: "PROGRESS"
-    taskId: "3.1-T2"
-    description: "開發：實作核心同步邏輯，使用 UrlFetchApp 呼叫 GitHub API 將產物內容 commit 並 push 至指定 Repo。"
-    status: "Done"
-  - logType: "TACTICAL_FIX"
-    taskId: "3.1-T2"
-    description: "修正：前端呼叫的後端函式 `uploadFileContent` 不存在，導致上傳流程失敗。"
-    status: "Done"
-    developerNotes: "根據 Vibe CEO 的錯誤回報，將後端主入口點從 `doPost` 調整為 `uploadFileContent(fileContent, nodeId)`，以匹配前端 `google.script.run` 的呼叫簽名，確保前後端通訊正常。"
----
-storyId: "3.2"
-storyTitle: "作為一個系統，在成功將產物推送到 GitHub 後，我需要記錄下版本控制資訊，以便在 GEMS 內部建立產物與程式碼倉儲之間的追溯連結。"
-acceptanceCriteriaStatus:
-  - id: "AC-3.2-1"
-    status: "Fulfilled"
-    verificationNote: "Vibe CEO 已手動測試確認，後端函式成功解析 GitHub API 回應並提取出 commit hash 與 file URL。"
-  - id: "AC-3.2-2"
-    status: "Fulfilled"
-    verificationNote: "Vibe CEO 已手動測試確認，上傳檔案後，`Artifacts` 工作表中對應紀錄的 `github_commit_hash` (F欄) 與 `github_file_url` (G欄) 被成功更新。"
-developerLog:
-  - logType: "PROGRESS"
-    taskId: "3.2-T1"
-    description: "開發：擴充 GitHub API 呼叫邏輯，使其能夠解析成功回應中的 JSON，提取 commit hash 與 file URL。"
-    status: "Done"
-  - logType: "PROGRESS"
-    taskId: "3.2-T2"
-    description: "開發：實作將提取出的 GitHub 資訊更新回 Google Sheets 中 `Artifacts` 工作表對應紀錄的函式。"
-    status: "Done"
----
-storyId: "4.1"
-storyTitle: "作為一個開發者，我想要將目前寫死在主程式碼中的 SVG 渲染邏輯，重構成一個可複用的元件，以提高程式碼的可維護性並為未來的圖表功能做準備。"
-acceptanceCriteriaStatus:
-  - id: "AC-4.1-1"
-    status: "Fulfilled"
-    verificationNote: "Vibe CEO 已確認，程式碼中存在獨立的 `renderProcessDiagram` 函式。"
-  - id: "AC-4.1-2"
-    status: "Fulfilled"
-    verificationNote: "Vibe CEO 已確認，主邏輯是透過呼叫新函式來渲染圖表。"
-  - id: "AC-4.1-3"
-    status: "Fulfilled"
-    verificationNote: "Vibe CEO 已完成無迴歸測試，並對佈局優化表示滿意，確認重構後的視覺與互動功能符合預期。"
-developerLog:
-  - logType: "PROGRESS"
-    taskId: "4.1-T1"
-    description: "開發：將現有的 SVG 渲染程式碼，封裝成一個獨立、可接收參數的 `renderProcessDiagram` 函式。"
-    status: "Done"
-  - logType: "PROGRESS"
-    taskId: "4.1-T2"
-    description: "重構：修改主 UI 腳本，移除舊的渲染邏輯，改為呼叫新的 `renderProcessDiagram` 函式來生成流程圖。"
-    status: "Done"
-  - logType: "IMPLICIT_ITERATION"
-    taskId: "4.1-T3"
-    description: "優化：根據 Vibe CEO 的回饋，縮小了流程圖節點尺寸並調整佈局，使其在有限空間內更易於查看。"
-    status: "Done"
-    developerNotes: "將所有節點的寬度從 200px 調整為 180px，高度從 60px 調整為 50px。同時重新計算了所有節點的 x, y 座標，讓整體佈局更加緊湊。"
-    changedFiles:
-      - 'Index.html'
-
+projectInfo:
+  projectName: "GEMS - 視覺化敏捷流程管理工具"
+  executiveSummary: "一個基於 Google Apps Script 和 Google Sheets 的輕量級網頁應用，旨在將定義好的敏捷開發流程（如 GEMS 流程）視覺化。它透過互動式流程圖來管理各階段產出的 YAML 文件，提供團隊一個清晰、集中且可追溯的專案儀表板。"
+  problemStatement: "敏捷開發流程中產生的各種 YAML 文件（如藍圖、衝刺計畫、QA報告）散落在各處，缺乏一個統一的視圖來追蹤專案的當前狀態與產出物的關聯性，導致資訊不同步且難以管理。"
+  targetUsers: "熟悉 YAML 文件驅動開發流程的小型敏捷團隊、專案經理、產品負責人。"
+  solutionVision: "我們提供一個以視覺化流程圖為核心的儀表板。使用者可以直觀地看到專案進程，並在對應的節點上傳、檢視和管理 YAML 產物，讓流程與產出緊密結合。"
+  successMetrics:
+    - "指標一: 使用者能在 3 次點擊內，完成一份 YAML 文件的上傳並在介面上看到其內容。"
+    - "指標二: 上線一個月後，一個標準衝刺流程中 80% 的產物節點都有對應的上傳紀錄。"
+technicalConsiderations:
+  platforms: "網頁應用，主要透過桌面瀏覽器訪問。"
+  technologyPreferences: "後端使用 Google Apps Script，資料庫使用 Google Sheets，前端使用 HTML Service 搭配 JavaScript/CSS。"
+  integrationNeeds: "（MVP 後）需要整合 GitHub API，將產出文件與程式碼版本庫同步。"
+constraintsAndRisks:
+  constraints: "需在 Google Apps Script 的執行時間與效能限制下運作。"
+  risks:
+    - "風險一: 隨著專案與產物數量增長，Google Sheets 作為資料庫可能遇到讀寫效能瓶頸。"
+    - "風險二: 前端 UI 的複雜互動（如節點圖）在 HTML Service 中實現的挑戰較高。"
+analysis:
+  towsAnalysis: |
+    * **優勢 (S)**: 流程定義清晰，與 YAML 格式緊密整合；使用 Google 生態系，開發成本低。
+    * **劣勢 (W)**: 高度依賴 Google 服務，效能與功能受其限制。
+    * **機會 (O)**: 市面上缺乏專為『文件驅動』的敏捷流程設計的超輕量級管理工具。
+    * **威脅 (T)**: 成熟的專案管理工具（如 Jira, Trello）可能推出類似的視覺化插件。
+architecture:
+  highLevelArchitecture:
+    architecturalStyle: "採用 Google Apps Script 作為後端的 Serverless Web App 架構。"
+    systemDiagram: |
+      graph TD;
+          A[使用者瀏覽器] --> B[HTML Service (UI)];
+          B -- Client-side JS --> C{Google Apps Script (Server-side)};
+          C -- SpreadsheetApp --> D[Google Sheets (Database)];
+          C -- UrlFetchApp --> E[GitHub API (Optional)];
+    frontendBackendIntegration: "前端透過 `google.script.run` 呼叫後端的 Apps Script 函式，進行資料的讀寫操作。"
+  techStack:
+    - category: "Backend Runtime"
+      technology: "Google Apps Script"
+      reason: "無伺服器、與 G Suite 無縫整合、低成本快速啟動。"
+    - category: "Database"
+      technology: "Google Sheets"
+      reason: "適合作為 MVP 階段的輕量級資料庫，直觀易於管理。"
+    - category: "Frontend"
+      technology: "HTML Service (HTML/CSS/JS)"
+      reason: "Google Apps Script 內建的網頁託管服務。"
+    - category: "Diagram Rendering"
+      technology: "Mermaid.js"
+      reason: "能直接將文字定義轉換為視覺化流程圖，與我們的核心需求完美契合。"
+  dataModels:
+    - modelName: "Projects"
+      description: "儲存專案的清單與基本資訊。"
+      fields:
+        project_id: "string (Primary Key)"
+        project_name: "string"
+        status: "string"
+        created_at: "Timestamp"
+    - modelName: "Artifacts"
+      description: "儲存所有上傳的產物（YAML 文件）及其元數據。"
+      fields:
+        artifact_id: "string (Primary Key)"
+        project_id: "string (Foreign Key)"
+        node_id: "string"
+        artifact_type: "string"
+        related_artifact_id: "string"
+        status: "string"
+        version: "string"
+        key_info_1: "string"
+        key_info_2: "string"
+        raw_content: "string (Full YAML text)"
+        created_at: "Timestamp"
+requirements:
+  inScope:
+    - id: "FR1"
+      description: "使用者可以建立一個新專案，並將專案資訊記錄在 Google Sheet 中。"
+    - id: "FR2"
+      description: "UI 左側能成功渲染出 Mermaid.txt 的流程圖，並顯示所有可互動的節點。"
+    - id: "FR3"
+      description: "使用者可以點擊流程圖中的任一文件節點，觸發檔案上傳介面。"
+    - id: "FR4"
+      description: "上傳的 YAML 文件內容及其元數據，會被儲存到 Google Sheets 的 Artifacts 工作表中。"
+    - id: "FR5"
+      description: "使用者點擊已上傳過產物的節點時，能在 UI 右側讀取並顯示其完整的 YAML 原始文字。"
+  outOfScope:
+    - "GitHub API 整合。"
+    - "節點根據狀態『亮燈』的動態視覺效果。"
+    - "YAML 內容的智慧摘要與解析功能。"
+    - "浮動『創意牆』功能。"
+    - "專案的刪除、版本化等進階管理功能。"
+  nonFunctional:
+    - id: "NFR1"
+      description: "應用程式需透過 Google Apps Script 部署為一個可公開訪問的網頁應用。"
+    - id: "NFR2"
+      description: "所有對 Google Sheets 的讀寫操作，在正常負載下應在 3 秒內完成。"
+epicsAndStories:
+  - epic: "Epic 1: 專案基礎與視覺化"
+    stories:
+      - id: "1.1"
+        story: "作為一個專案經理，我想要建立一個新專案並為它命名，以便開始追蹤這個專案的所有產出物。"
+        acceptanceCriteria:
+          - id: "AC-1.1-1"
+            description: "介面上有一個『新增專案』的按鈕。"
+          - id: "AC-1.1-2"
+            description: "點擊按鈕後，輸入專案名稱並提交，一筆新的紀錄會出現在 Google Sheets 的 `Projects` 工作表中。"
+      - id: "1.2"
+        story: "作為一個團隊成員，我想要在打開應用時，能看到一個基於 Mermaid.txt 的標準開發流程圖，以便我能了解整個開發流程的各個階段。"
+        acceptanceCriteria:
+          - id: "AC-1.2-1"
+            description: "網頁左側區域成功渲染出一個流程圖。"
+          - id: "AC-1.2-2"
+            description: "圖中的節點（如 B1, B2, B3）應是可點擊的。"
+  - epic: "Epic 2: 核心產物管理流程"
+    stories:
+      - id: "2.1"
+        story: "作為一個開發者，我想要點擊流程圖中的一個文件節點（例如 B5: sprint fillback），以便上傳我完成的 YAML 工作日誌。"
+        acceptanceCriteria:
+          - id: "AC-2.1-1"
+            description: "點擊任一文件節點後，會彈出一個標準的檔案選擇對話框。"
+          - id: "AC-2.1-2"
+            description: "選擇 YAML 檔案並確認後，檔案內容會被傳送到後端 Google Apps Script 進行處理。"
+      - id: "2.2"
+        story: "作為一個系統，當收到上傳的 YAML 文件後，我需要將其內容及關聯資訊儲存到 Google Sheet，以便永久保存紀錄。"
+        acceptanceCriteria:
+          - id: "AC-2.2-1"
+            description: "後端函式成功接收到檔案內容。"
+          - id: "AC-2.2-2"
+            description: "一筆新的紀錄被新增到 `Artifacts` 工作表中，其中 `raw_content` 包含完整的 YAML 文本，且 `project_id` 和 `node_id` 欄位被正確填寫。"
+      - id: "2.3"
+        story: "作為一個品管師，我想要點擊一個已經上傳過 QA 報告的節點（B6），以便在畫面右側看到報告的完整內容以進行審核。"
+        acceptanceCriteria:
+          - id: "AC-2.3-1"
+            description: "點擊一個節點時，系統會檢查 `Artifacts` 表中是否存在對應的紀錄。"
+          - id: "AC-2.3-2"
+            description: "如果存在紀錄，畫面右側的內容區會顯示該紀錄的 `raw_content`。"
