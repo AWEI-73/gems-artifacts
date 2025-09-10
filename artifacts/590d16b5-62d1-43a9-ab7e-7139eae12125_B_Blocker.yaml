@@ -1,132 +1,97 @@
-projectInfo:2.9-123
-  projectName: "GEMS - 視覺化敏捷流程管理工具"
-  executiveSummary: "一個基於 Google Apps Script 和 Google Sheets 的輕量級網頁應用，旨在將定義好的敏捷開發流程（如 GEMS 流程）視覺化。它透過互動式流程圖來管理各階段產出的 YAML 文件，提供團隊一個清晰、集中且可追溯的專案儀表板。"
-  problemStatement: "敏捷開發流程中產生的各種 YAML 文件（如藍圖、衝刺計畫、QA報告）散落在各處，缺乏一個統一的視圖來追蹤專案的當前狀態與產出物的關聯性，導致資訊不同步且難以管理。"
-  targetUsers: "熟悉 YAML 文件驅動開發流程的小型敏捷團隊、專案經理、產品負責人。"
-  solutionVision: "我們提供一個以視覺化流程圖為核心的儀表板。使用者可以直觀地看到專案進程，並在對應的節點上傳、檢視和管理 YAML 產物，讓流程與產出緊密結合。"
+projectInfo:
+  projectName: 智慧菜單規劃與意見調查系統
+  executiveSummary: 一款整合 Google Sheets 作為後端、Google Apps Script 作為前端的菜單管理工具。它能將現有菜單匯入為結構化資料，並透過使用者意見調查來收集偏好，最終目標是結合 AI 分析與菜價爬蟲，提供智慧化的菜單建議。
+  problemStatement: 餐廳或團體膳食管理者在規劃菜單時，缺乏有效的工具來收集使用者偏好，且難以系統化地管理菜色清單。手動整理菜單費時費力，也無法有效避免菜色重複或考量成本。
+  targetUsers: 負責學校、企業或餐廳菜單規劃的管理者，以及希望對菜色有發言權的終端使用者（如學生、員工、顧客）。
+  solutionVision: 打造一個輕量、易用的菜單管理與決策輔助系統。初期透過自動化匯入和使用者投票來簡化流程，未來擴展至 AI 驅動的智慧菜單推薦，幫助管理者在滿足使用者偏好的同時，也能控制成本。
   successMetrics:
-    - "指標一: 使用者能在 3 次點擊內，完成一份 YAML 文件的上傳並在介面上看到其內容。"
-    - "指標二: 上線一個月後，一個標準衝刺流程中 80% 的產物節點都有對應的上傳紀錄。"
-technicalConsiderations:
-  platforms: "網頁應用，主要透過桌面瀏覽器訪問。"
-  technologyPreferences: "後端使用 Google Apps Script，資料庫使用 Google Sheets，前端使用 HTML Service 搭配 JavaScript/CSS。"
-  integrationNeeds: "（MVP 後）需要整合 GitHub API，將產出文件與程式碼版本庫同步。"
-constraintsAndRisks:
-  constraints: "需在 Google Apps Script 的執行時間與效能限制下運作。"
-  risks:
-    - "風險一: 隨著專案與產物數量增長，Google Sheets 作為資料庫可能遇到讀寫效能瓶頸。"
-    - "風險二: 前端 UI 的複雜互動（如節點圖）在 HTML Service 中實現的挑戰較高。"
-analysis:
-  towsAnalysis: |
-    * **優勢 (S)**: 流程定義清晰，與 YAML 格式緊密整合；使用 Google 生態系，開發成本低。
-    * **劣勢 (W)**: 高度依賴 Google 服務，效能與功能受其限制。
-    * **機會 (O)**: 市面上缺乏專為『文件驅動』的敏捷流程設計的超輕量級管理工具。
-    * **威脅 (T)**: 成熟的專案管理工具（如 Jira, Trello）可能推出類似的視覺化插件。
+    - "指標一：管理者能在 5 分鐘內，成功將一份現有菜單匯入系統並建立一份調查表。"
+    - "指標二：上線一個月後，目標群體的使用者投票率達到 70% 以上。"
+    - "指標三：透過系統收集到的回饋，下一個週期的菜單滿意度提升 15%。"
 architecture:
-  highLevelArchitecture:
-    architecturalStyle: "採用 Google Apps Script 作為後端的 Serverless Web App 架構。"
-    systemDiagram: |
-      graph TD;
-          A[使用者瀏覽器] --> B[HTML Service (UI)];
-          B -- Client-side JS --> C{Google Apps Script (Server-side)};
-          C -- SpreadsheetApp --> D[Google Sheets (Database)];
-          C -- UrlFetchApp --> E[GitHub API (Optional)];
-    frontendBackendIntegration: "前端透過 `google.script.run` 呼叫後端的 Apps Script 函式，進行資料的讀寫操作。"
   techStack:
-    - category: "Backend Runtime"
-      technology: "Google Apps Script"
-      reason: "無伺服器、與 G Suite 無縫整合、低成本快速啟動。"
-    - category: "Database"
-      technology: "Google Sheets"
-      reason: "適合作為 MVP 階段的輕量級資料庫，直觀易於管理。"
-    - category: "Frontend"
-      technology: "HTML Service (HTML/CSS/JS)"
-      reason: "Google Apps Script 內建的網頁託管服務。"
-    - category: "Diagram Rendering"
-      technology: "Mermaid.js"
-      reason: "能直接將文字定義轉換為視覺化流程圖，與我們的核心需求完美契合。"
-  dataModels:
-    - modelName: "Projects"
-      description: "儲存專案的清單與基本資訊。"
-      fields:
-        project_id: "string (Primary Key)"
-        project_name: "string"
-        status: "string"
-        created_at: "Timestamp"
-    - modelName: "Artifacts"
-      description: "儲存所有上傳的產物（YAML 文件）及其元數據。"
-      fields:
-        artifact_id: "string (Primary Key)"
-        project_id: "string (Foreign Key)"
-        node_id: "string"
-        artifact_type: "string"
-        related_artifact_id: "string"
-        status: "string"
-        version: "string"
-        key_info_1: "string"
-        key_info_2: "string"
-        raw_content: "string (Full YAML text)"
-        created_at: "Timestamp"
+    - component: 前端 (Frontend)
+      technology: Google Apps Script (HTML Service)
+      description: 用於生成管理者後台介面與使用者投票介面。
+    - component: 後端 (Backend)
+      technology: Google Apps Script (Code.gs)
+      description: 處理所有業務邏輯，包括資料匯入、讀寫 Google Sheets、處理投票數據等。
+    - component: 資料庫 (Database)
+      technology: Google Sheets
+      description: 儲存所有結構化菜單資料、使用者投票記錄、以及系統設定。
+  systemDiagram: |
+    graph TD
+        subgraph "使用者端"
+            A[使用者投票介面 (HTML)] -->|提交投票| B(Google Apps Script API)
+        end
+        subgraph "管理者端"
+            C[管理後台 (HTML)] -->|1. 上傳菜單檔案| B
+            C -->|2. 建立調查表| B
+            C -->|3. 查看投票結果| B
+        end
+        subgraph "後端邏輯"
+            B -->|讀寫資料| D[Google Sheets]
+        end
+        subgraph "資料庫"
+            D -- "工作表1: 完整菜單資料庫 (Menu Master)"
+            D -- "工作表2: 當期調查菜色 (Current Survey)"
+            D -- "工作表3: 投票記錄 (Voting Records)"
+        end
+
 requirements:
   inScope:
-    - id: "FR1"
-      description: "使用者可以建立一個新專案，並將專案資訊記錄在 Google Sheet 中。"
-    - id: "FR2"
-      description: "UI 左側能成功渲染出 Mermaid.txt 的流程圖，並顯示所有可互動的節點。"
-    - id: "FR3"
-      description: "使用者可以點擊流程圖中的任一文件節點，觸發檔案上傳介面。"
-    - id: "FR4"
-      description: "上傳的 YAML 文件內容及其元數據，會被儲存到 Google Sheets 的 Artifacts 工作表中。"
-    - id: "FR5"
-      description: "使用者點擊已上傳過產物的節點時，能在 UI 右側讀取並顯示其完整的 YAML 原始文字。"
+    - 核心匯入功能：管理者能將特定格式的現有菜單，成功匯入到 Google Sheets 並轉為結構化資料。
+    - 調查表建立與發布：管理者能從匯入的菜色清單中，挑選主菜與副菜，建立一份新的意見調查表。
+    - 使用者投票介面：使用者可以透過一個簡單的網頁介面看到當期的菜色選項，並進行投票。
+    - 投票結果回填：使用者的投票結果會被自動、準確地記錄回 Google Sheets 的指定工作表中。
+    - 基本管理後台：管理者有一個基本介面，可以觸發匯入、建立調查表，並查看原始的投票結果數據。
   outOfScope:
-    - "GitHub API 整合。"
-    - "節點根據狀態『亮燈』的動態視覺效果。"
-    - "YAML 內容的智慧摘要與解析功能。"
-    - "浮動『創意牆』功能。"
-    - "專案的刪除、版本化等進階管理功能。"
+    - AI 菜色重複性分析：根據週期判斷菜色重複性的功能。
+    - 菜價爬蟲與智慧推薦：抓取外部菜價並提供智慧推薦的功能。
   nonFunctional:
-    - id: "NFR1"
-      description: "應用程式需透過 Google Apps Script 部署為一個可公開訪問的網頁應用。"
-    - id: "NFR2"
-      description: "所有對 Google Sheets 的讀寫操作，在正常負載下應在 3 秒內完成。"
+    - 簡易性：所有使用者介面（投票頁、管理頁）必須直觀、易於操作。
+    - 準確性：資料的匯入和投票結果的回填必須保證 100% 的準確性。
+    - 回應速度：使用者投票介面的載入與提交，應在 3-5 秒內完成。
+
 epicsAndStories:
-  - epic: "Epic 1: 專案基礎與視覺化"
+  - epic: "MVP 核心功能：從菜單匯入到投票完成"
     stories:
-      - id: "1.1"
-        story: "作為一個專案經理，我想要建立一個新專案並為它命名，以便開始追蹤這個專案的所有產出物。"
+      - id: Story-001
+        story: "作為一個管理者，我想要在管理後台介面上傳一個特定格式的 Excel 檔案，以便我能快速地將現有的主菜與副菜清單匯入到 Google Sheets 資料庫中。"
         acceptanceCriteria:
-          - id: "AC-1.1-1"
-            description: "介面上有一個『新增專案』的按鈕。"
-          - id: "AC-1.1-2"
-            description: "點擊按鈕後，輸入專案名稱並提交，一筆新的紀錄會出現在 Google Sheets 的 `Projects` 工作表中。"
-      - id: "1.2"
-        story: "作為一個團隊成員，我想要在打開應用時，能看到一個基於 Mermaid.txt 的標準開發流程圖，以便我能了解整個開發流程的各個階段。"
+          - "前提：管理者在管理後台頁面。"
+          - "當：我選擇一個欄位包含「菜色名稱」和「分類」（例如 '主菜', '副菜'）的 Excel 檔案，並點擊「上傳」按鈕。"
+          - "那麼：系統會解析該 Excel 檔案的內容。"
+          - "而且：系統會先清空舊的「完整菜單資料庫」工作表。"
+          - "而且：所有菜色及其對應的分類，會被逐行新增到 Google Sheets 的「完整菜單資料庫」工作表中。"
+          - "而且：上傳成功後，頁面上會顯示「匯入成功，總共匯入 X 筆菜色資料」的成功訊息。"
+          - "而且：如果檔案格式不符（如缺少必要欄位），頁面會顯示明確的錯誤訊息，且資料庫不會寫入任何資料。"
+      - id: Story-002
+        story: "作為一個管理者，我想要從已匯入的菜色清單中挑選菜色來建立一份新的意見調查表，以便我能發布給使用者進行投票。"
         acceptanceCriteria:
-          - id: "AC-1.2-1"
-            description: "網頁左側區域成功渲染出一個流程圖。"
-          - id: "AC-1.2-2"
-            description: "圖中的節點（如 B1, B2, B3）應是可點擊的。"
-  - epic: "Epic 2: 核心產物管理流程"
-    stories:
-      - id: "2.1"
-        story: "作為一個開發者，我想要點擊流程圖中的一個文件節點（例如 B5: sprint fillback），以便上傳我完成的 YAML 工作日誌。"
+          - "前提：管理者在管理後台頁面，且「完整菜單資料庫」工作表中已有資料。"
+          - "當：頁面從「完整菜單資料庫」讀取資料，並依「分類」將主菜與副菜分開列表顯示（附有複選框），我勾選完想要的菜色後，點擊「建立調查表」按鈕。"
+          - "那麼：系統會清空「當期調查菜色」工作表中的舊資料。"
+          - "而且：系統會將我所勾選的所有菜色（包含菜色名稱與分類）寫入「當期調查菜色」工作表中。"
+          - "而且：頁面上會顯示成功訊息，例如「調查表建立成功！本次包含 X 道主菜，Y 道副菜。」"
+          - "而且：頁面上會同時顯示一個可用於分享給使用者的「投票頁面連結」。"
+          - "而且：如果我沒有選擇任何主菜或副菜就點擊按鈕，頁面應提示「請至少選擇一道主菜與一道副菜」。"
+      - id: Story-003
+        story: "作為一個使用者，我想要透過一個簡單的投票頁面，勾選我喜歡的所有主菜與副菜，以便管理者能了解我的偏好。"
         acceptanceCriteria:
-          - id: "AC-2.1-1"
-            description: "點擊任一文件節點後，會彈出一個標準的檔案選擇對話框。"
-          - id: "AC-2.1-2"
-            description: "選擇 YAML 檔案並確認後，檔案內容會被傳送到後端 Google Apps Script 進行處理。"
-      - id: "2.2"
-        story: "作為一個系統，當收到上傳的 YAML 文件後，我需要將其內容及關聯資訊儲存到 Google Sheet，以便永久保存紀錄。"
+          - "前提：使用者開啟了管理者分享的「投票頁面連結」。"
+          - "當：頁面載入後，我看到了本次所有可選的主菜列表和副菜列表，每個菜名前都有一個複選框。"
+          - "而且：我勾選了我想吃的 2 道主菜和 3 道副菜，並點擊「提交我的選擇」按鈕。"
+          - "那麼：系統會將我的選擇（包含選擇的菜色名稱與一個時間戳記）記錄到 Google Sheets 的「投票記錄」工作表中。"
+          - "而且：頁面會跳轉到一個感謝頁面，顯示「投票成功，感謝您的參與！」的訊息。"
+          - "而且：如果我沒有勾選任何菜色就點擊提交，頁面會提示「請至少選擇一道您喜歡的菜色」。"
+      - id: Story-004
+        story: "作為一個管理者，我想要在管理後台查看一個簡單的投票結果統計，以便我能快速了解大家的菜色偏好，作為規劃菜單的依據。"
         acceptanceCriteria:
-          - id: "AC-2.2-1"
-            description: "後端函式成功接收到檔案內容。"
-          - id: "AC-2.2-2"
-            description: "一筆新的紀錄被新增到 `Artifacts` 工作表中，其中 `raw_content` 包含完整的 YAML 文本，且 `project_id` 和 `node_id` 欄位被正確填寫。"
-      - id: "2.3"
-        story: "作為一個品管師，我想要點擊一個已經上傳過 QA 報告的節點（B6），以便在畫面右側看到報告的完整內容以進行審核。"
-        acceptanceCriteria:
-          - id: "AC-2.3-1"
-            description: "點擊一個節點時，系統會檢查 `Artifacts` 表中是否存在對應的紀錄。"
-          - id: "AC-2.3-2"
-            description: "如果存在紀錄，畫面右側的內容區會顯示該紀錄的 `raw_content`。"
+          - "前提：管理者在管理後台頁面，且「投票記錄」工作表中已有使用者投票資料。"
+          - "當：我點擊「查看投票結果」按鈕。"
+          - "那麼：系統會讀取並統計「投票記錄」工作表中的所有資料。"
+          - "而且：頁面上會以列表形式，分別顯示主菜與副菜的投票排行榜。"
+          - "而且：每個菜色名稱旁邊會顯示其獲得的總票數。"
+          - "而且：列表會依照票數由高至低排序，讓最受歡迎的菜色一目了然。"
+
