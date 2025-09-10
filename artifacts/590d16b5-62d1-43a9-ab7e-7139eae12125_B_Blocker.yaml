@@ -1,4 +1,4 @@
-projectInfo:
+projectInfo:weqweqwe
   projectName: "GEMS - 視覺化敏捷流程管理工具"dasdasddsdd
   executiveSummary: "一個基於 Google Apps Script 和 Google Sheets 的輕量級網頁應用，旨在將定義好的敏捷開發流程（如 GEMS 流程）視覺化。它透過互動式流程圖來管理各階段產出的 YAML 文件，提供團隊一個清晰、集中且可追溯的專案儀表板。"
   problemStatement: "敏捷開發流程中產生的各種 YAML 文件（如藍圖、衝刺計畫、QA報告）散落在各處，缺乏一個統一的視圖來追蹤專案的當前狀態與產出物的關聯性，導致資訊不同步且難以管理。"
