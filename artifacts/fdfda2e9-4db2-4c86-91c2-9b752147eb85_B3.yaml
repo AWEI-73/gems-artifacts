@@ -1,27 +1,27 @@
+# ===================================================================
+# GEMS - MVP Blueprint v4.0
+# ===================================================================
+# Iteration: 2
+# Focus: 核心技術整合與前端架構重構 (Core Tech Integration & Frontend Refactoring)
+# ===================================================================
+
 projectInfo:
   projectName: "GEMS - 視覺化敏捷流程管理工具"
-  executiveSummary: "一個基於 Google Apps Script 和 Google Sheets 的輕量級網頁應用，旨在將定義好的敏捷開發流程（如 GEMS 流程）視覺化。它透過互動式流程圖來管理各階段產出的 YAML 文件，提供團隊一個清晰、集中且可追溯的專案儀表板。"
-  problemStatement: "敏捷開發流程中產生的各種 YAML 文件（如藍圖、衝刺計畫、QA報告）散落在各處，缺乏一個統一的視圖來追蹤專案的當前狀態與產出物的關聯性，導致資訊不同步且難以管理。"
-  targetUsers: "熟悉 YAML 文件驅動開發流程的小型敏捷團隊、專案經理、產品負責人。"
-  solutionVision: "我們提供一個以視覺化流程圖為核心的儀表板。使用者可以直觀地看到專案進程，並在對應的節點上傳、檢視和管理 YAML 產物，讓流程與產出緊密結合。"
-  successMetrics:
-    - "指標一: 使用者能在 3 次點擊內，完成一份 YAML 文件的上傳並在介面上看到其內容。"
-    - "指標二: 上線一個月後，一個標準衝刺流程中 80% 的產物節點都有對應的上傳紀錄。"
+  executiveSummary: "一個基於 Google Apps Script 和 Google Sheets 的輕量級網頁應用，旨在將定義好的敏捷開發流程視覺化。它透過互動式流程圖來管理各階段產出的 YAML 文件，提供團隊一個清晰、集中且可追溯的專案儀表板。"
+  sprintGoal: "完成與 GitHub API 的核心整合，實現產物的版本控制與同步，並重構前端 SVG 渲染邏輯以償還技術債，提升系統的長期穩定性。"
+
 technicalConsiderations:
   platforms: "網頁應用，主要透過桌面瀏覽器訪問。"
   technologyPreferences: "後端使用 Google Apps Script，資料庫使用 Google Sheets，前端使用 HTML Service 搭配 JavaScript/CSS。"
-  integrationNeeds: "（MVP 後）需要整合 GitHub API，將產出文件與程式碼版本庫同步。"
+  integrationNeeds: "需要與 GitHub REST API 進行穩定的後端整合。"
+
 constraintsAndRisks:
   constraints: "需在 Google Apps Script 的執行時間與效能限制下運作。"
   risks:
     - "風險一: 隨著專案與產物數量增長，Google Sheets 作為資料庫可能遇到讀寫效能瓶頸。"
-    - "風險二: 前端 UI 的複雜互動（如節點圖）在 HTML Service 中實現的挑戰較高。"
-analysis:
-  towsAnalysis: |
-    * **優勢 (S)**: 流程定義清晰，與 YAML 格式緊密整合；使用 Google 生態系，開發成本低。
-    * **劣勢 (W)**: 高度依賴 Google 服務，效能與功能受其限制。
-    * **機會 (O)**: 市面上缺乏專為『文件驅動』的敏捷流程設計的超輕量級管理工具。
-    * **威脅 (T)**: 成熟的專案管理工具（如 Jira, Trello）可能推出類似的視覺化插件。
+    - "風險二: 外部 API (GitHub) 的穩定性與網路延遲，可能影響產物同步的成功率與使用者體驗。"
+    - "風險三: GitHub API 的認證權杖需要被安全地儲存與管理。"
+
 architecture:
   highLevelArchitecture:
     architecturalStyle: "採用 Google Apps Script 作為後端的 Serverless Web App 架構。"
@@ -30,8 +30,8 @@ architecture:
           A[使用者瀏覽器] --> B[HTML Service (UI)];
           B -- Client-side JS --> C{Google Apps Script (Server-side)};
           C -- SpreadsheetApp --> D[Google Sheets (Database)];
-          C -- UrlFetchApp --> E[GitHub API (Optional)];
-    frontendBackendIntegration: "前端透過 `google.script.run` 呼叫後端的 Apps Script 函式，進行資料的讀寫操作。"
+          C -- UrlFetchApp --> E[GitHub API];
+    frontendBackendIntegration: "前端透過 `google.script.run` 呼叫後端的 Apps Script 函式，進行資料的讀寫與外部服務的觸發。"
   techStack:
     - category: "Backend Runtime"
       technology: "Google Apps Script"
@@ -43,8 +43,11 @@ architecture:
       technology: "HTML Service (HTML/CSS/JS)"
       reason: "Google Apps Script 內建的網頁託管服務。"
     - category: "Diagram Rendering"
-      technology: "Mermaid.js"
-      reason: "能直接將文字定義轉換為視覺化流程圖，與我們的核心需求完美契合。"
+      technology: "Inline SVG"
+      reason: "[As-Built from Sprint 1] 已驗證在 GAS 環境中比第三方函式庫更穩健。"
+    - category: "External Services"
+      technology: "GitHub API"
+      reason: "用於實現產物的版本控制與程式碼同步。"
   dataModels:
     - modelName: "Projects"
       description: "儲存專案的清單與基本資訊。"
@@ -66,67 +69,59 @@ architecture:
         key_info_1: "string"
         key_info_2: "string"
         raw_content: "string (Full YAML text)"
+        github_file_url: "string"
+        github_commit_hash: "string"
         created_at: "Timestamp"
+
 requirements:
   inScope:
-    - id: "FR1"
-      description: "使用者可以建立一個新專案，並將專案資訊記錄在 Google Sheet 中。"
-    - id: "FR2"
-      description: "UI 左側能成功渲染出 Mermaid.txt 的流程圖，並顯示所有可互動的節點。"
-    - id: "FR3"
-      description: "使用者可以點擊流程圖中的任一文件節點，觸發檔案上傳介面。"
-    - id: "FR4"
-      description: "上傳的 YAML 文件內容及其元數據，會被儲存到 Google Sheets 的 Artifacts 工作表中。"
-    - id: "FR5"
-      description: "使用者點擊已上傳過產物的節點時，能在 UI 右側讀取並顯示其完整的 YAML 原始文字。"
+    - id: "FR6"
+      description: "系統後端能夠使用預設的配置（API Token, Repo, Branch），透過 UrlFetchApp 服務向 GitHub API 發送請求。"
+    - id: "FR7"
+      description: "當使用者上傳一份 YAML 產物後，其內容會被成功地 commit 並 push到指定的 GitHub Repo 的指定路徑下。"
+    - id: "FR8"
+      description: "在成功 push 到 GitHub 後，對應的回應（包含 commit hash 和檔案 URL）會被解析並儲存回 Google Sheets 中 `Artifacts` 工作表的相應欄位。"
+    - id: "FR9"
+      description: "前端的 SVG 流程圖渲染邏輯，被從主 UI 腳本中分離出來，封裝成一個獨立、可複用的函式或元件。"
   outOfScope:
-    - "GitHub API 整合。"
-    - "節點根據狀態『亮燈』的動態視覺效果。"
     - "YAML 內容的智慧摘要與解析功能。"
     - "浮動『創意牆』功能。"
-    - "專案的刪除、版本化等進階管理功能。"
+    - "節點根據狀態『亮燈』的動態視覺效果。"
+    - "多 GitHub Repo 或多分支的動態配置功能。"
   nonFunctional:
-    - id: "NFR1"
-      description: "應用程式需透過 Google Apps Script 部署為一個可公開訪問的網頁應用。"
-    - id: "NFR2"
-      description: "所有對 Google Sheets 的讀寫操作，在正常負載下應在 3 秒內完成。"
+    - id: "NFR3"
+      description: "對 GitHub API 的呼叫操作應有 10 秒的超時限制，並有基本的錯誤處理機制。"
+    - id: "NFR4"
+      description: "SVG 元件化重構後，前端頁面的載入時間與互動效能不應有可感知的下降。"
+
 epicsAndStories:
-  - epic: "Epic 1: 專案基礎與視覺化"
+  - epic: "Epic 3: 核心技術整合與版本控制"
     stories:
-      - id: "1.1"
-        story: "作為一個專案經理，我想要建立一個新專案並為它命名，以便開始追蹤這個專案的所有產出物。"
+      - id: "3.1"
+        story: "作為一個開發者，我希望在我上傳產物後，系統能自動將該文件同步到指定的 GitHub Repo，以便讓文件與程式碼的版本保持一致。"
         acceptanceCriteria:
-          - id: "AC-1.1-1"
-            description: "介面上有一個『新增專案』的按鈕。"
-          - id: "AC-1.1-2"
-            description: "點擊按鈕後，輸入專案名稱並提交，一筆新的紀錄會出現在 Google Sheets 的 `Projects` 工作表中。"
-      - id: "1.2"
-        story: "作為一個團隊成員，我想要在打開應用時，能看到一個基於 Mermaid.txt 的標準開發流程圖，以便我能了解整個開發流程的各個階段。"
+          - id: "AC-3.1-1"
+            description: "當一份 YAML 檔案被成功儲存到 Google Sheet 後，一個後端函式會被觸發，以啟動 GitHub 同步流程。"
+          - id: "AC-3.1-2"
+            description: "後端 Apps Script 中有一個安全的配置區塊，用於存放 GitHub API Token, Repo 名稱, 分支名稱, 以及目標檔案路徑。"
+          - id: "AC-3.1-3"
+            description: "在 GitHub 的目標 Repo 中，可以查看到一個新的 commit，其內容與上傳的 YAML 文件完全相符。"
+      - id: "3.2"
+        story: "作為一個系統，在成功將產物推送到 GitHub 後，我需要記錄下版本控制資訊，以便在 GEMS 內部建立產物與程式碼倉儲之間的追溯連結。"
         acceptanceCriteria:
-          - id: "AC-1.2-1"
-            description: "網頁左側區域成功渲染出一個流程圖。"
-          - id: "AC-1.2-2"
-            description: "圖中的節點（如 B1, B2, B3）應是可點擊的。"
-  - epic: "Epic 2: 核心產物管理流程"
+          - id: "AC-3.2-1"
+            description: "後端函式能成功解析 GitHub API 的成功回應，並從中提取出 commit hash 和檔案的 blob URL。"
+          - id: "AC-3.2-2"
+            description: "在 `Artifacts` 工作表中，對應的產物紀錄列，其 `github_commit_hash` 與 `github_file_url` 欄位被成功更新。"
+  - epic: "Epic 4: 前端架構健壯性提升"
     stories:
-      - id: "2.1"
-        story: "作為一個開發者，我想要點擊流程圖中的一個文件節點（例如 B5: sprint fillback），以便上傳我完成的 YAML 工作日誌。"
+      - id: "4.1"
+        story: "作為一個開發者，我想要將目前寫死在主程式碼中的 SVG 渲染邏輯，重構成一個可複用的元件，以提高程式碼的可維護性並為未來的圖表功能做準備。"
+        sourceLog: "Iteration 1 Closing Report (NIC-S1-002)"
         acceptanceCriteria:
-          - id: "AC-2.1-1"
-            description: "點擊任一文件節點後，會彈出一個標準的檔案選擇對話框。"
-          - id: "AC-2.1-2"
-            description: "選擇 YAML 檔案並確認後，檔案內容會被傳送到後端 Google Apps Script 進行處理。"
-      - id: "2.2"
-        story: "作為一個系統，當收到上傳的 YAML 文件後，我需要將其內容及關聯資訊儲存到 Google Sheet，以便永久保存紀錄。"
-        acceptanceCriteria:
-          - id: "AC-2.2-1"
-            description: "後端函式成功接收到檔案內容。"
-          - id: "AC-2.2-2"
-            description: "一筆新的紀錄被新增到 `Artifacts` 工作表中，其中 `raw_content` 包含完整的 YAML 文本，且 `project_id` 和 `node_id` 欄位被正確填寫。"
-      - id: "2.3"
-        story: "作為一個品管師，我想要點擊一個已經上傳過 QA 報告的節點（B6），以便在畫面右側看到報告的完整內容以進行審核。"
-        acceptanceCriteria:
-          - id: "AC-2.3-1"
-            description: "點擊一個節點時，系統會檢查 `Artifacts` 表中是否存在對應的紀錄。"
-          - id: "AC-2.3-2"
-            description: "如果存在紀錄，畫面右側的內容區會顯示該紀錄的 `raw_content`。"
+          - id: "AC-4.1-1"
+            description: "程式碼庫中存在一個獨立的函式（例如 `renderProcessDiagram(nodes, links)`），它能接收節點與連結資料作為輸入，並回傳一個完整的 SVG 字串。"
+          - id: "AC-4.1-2"
+            description: "前端主邏輯透過呼叫此函式來渲染流程圖，而不是在自身內部包含大量的 SVG 標籤生成程式碼。"
+          - id: "AC-4.1-3"
+            description: "[無迴歸測試] 重構後，流程圖的視覺外觀、節點位置、以及點擊節點觸發右側面板更新的行為，必須與第一次迭代結束時的狀態完全相同。"
